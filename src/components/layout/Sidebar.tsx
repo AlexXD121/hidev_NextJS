@@ -38,7 +38,7 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <div className="flex h-screen w-64 flex-col fixed left-0 top-0 border-r border-[#1a202c] bg-slate-950 text-white transition-all duration-300">
+    <div className="flex h-screen w-64 flex-col shrink-0 border-r border-[#1a202c] bg-slate-950 text-white transition-all duration-300">
       <div className="flex items-center gap-2 px-6 py-8">
         <div className="h-8 w-8 rounded-full bg-[#25D366] flex items-center justify-center">
           <MessageSquare className="h-5 w-5 text-white fill-current" />
