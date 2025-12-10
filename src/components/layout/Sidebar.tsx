@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation"
 import { LayoutDashboard, MessageSquare, Users, Megaphone, Settings, LogOut } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { CURRENT_USER } from "@/lib/mockData"
 
 const sidebarItems = [
   {
@@ -15,7 +17,7 @@ const sidebarItems = [
   {
     title: "Live Chat",
     icon: MessageSquare,
-    href: "/messages",
+    href: "/chat",
   },
   {
     title: "Contacts",
@@ -69,6 +71,20 @@ export function Sidebar() {
       </nav>
 
       <div className="p-4 border-t border-[#1a202c]">
+        <div className="flex items-center gap-3 mb-4 px-2">
+          <Avatar className="h-9 w-9 border border-slate-700">
+            <AvatarImage src={CURRENT_USER.avatar} alt={CURRENT_USER.name} />
+            <AvatarFallback className="bg-slate-800 text-slate-200">
+              {CURRENT_USER.name.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-white">{CURRENT_USER.name}</span>
+            <span className="text-xs text-slate-400 truncate max-w-[120px]" title={CURRENT_USER.email}>
+              {CURRENT_USER.email}
+            </span>
+          </div>
+        </div>
         <button className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-slate-400 hover:bg-red-900/20 hover:text-red-400 transition-colors">
           <LogOut className="h-5 w-5" />
           Logout
