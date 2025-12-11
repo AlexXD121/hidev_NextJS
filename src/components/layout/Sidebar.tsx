@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, MessageSquare, Users, Megaphone, Settings, LogOut } from "lucide-react"
+import { LayoutDashboard, MessageSquare, Users, Megaphone, Settings, LogOut, FileText } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -28,6 +28,11 @@ const sidebarItems = [
     title: "Campaigns",
     icon: Megaphone,
     href: "/campaigns",
+  },
+  {
+    title: "Templates",
+    icon: FileText,
+    href: "/templates",
   },
   {
     title: "Settings",
