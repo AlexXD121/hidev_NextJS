@@ -17,6 +17,23 @@ interface AnalyticsChartProps {
 }
 
 export function AnalyticsChart({ data, title = "Message Trends", description = "Sent vs Delivered vs Read over the last 7 days" }: AnalyticsChartProps) {
+    // Don't render chart if no data
+    if (!data || data.length === 0) {
+        return (
+            <Card className="col-span-4">
+                <CardHeader>
+                    <CardTitle>{title}</CardTitle>
+                    <p className="text-sm text-muted-foreground">{description}</p>
+                </CardHeader>
+                <CardContent className="pl-2">
+                    <div className="h-[350px] w-full flex items-center justify-center text-muted-foreground">
+                        No data available
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
+
     return (
         <Card className="col-span-4">
             <CardHeader>
@@ -24,8 +41,8 @@ export function AnalyticsChart({ data, title = "Message Trends", description = "
                 <p className="text-sm text-muted-foreground">{description}</p>
             </CardHeader>
             <CardContent className="pl-2">
-                <div className="h-[350px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
+                <div className="h-[350px] w-full min-h-[350px]">
+                    <ResponsiveContainer width="100%" height={350} minHeight={350}>
                         <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="colorSent" x1="0" y1="0" x2="0" y2="1">
