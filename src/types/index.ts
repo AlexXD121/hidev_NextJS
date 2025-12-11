@@ -23,7 +23,8 @@ export interface Message {
     text: string;
     timestamp: string;
     status: "sent" | "delivered" | "read";
-    type: "text" | "image" | "template";
+    type: "text" | "image" | "template" | "video" | "document";
+    mediaUrl?: string;
 }
 
 export interface ChatSession {

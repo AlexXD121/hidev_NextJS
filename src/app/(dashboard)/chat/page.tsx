@@ -1,8 +1,9 @@
+import { ChatLayout } from "@/components/chat/ChatLayout"
+
 export default function ChatPage() {
     return (
-        <div className="space-y-6">
-            <h1 className="text-2xl font-bold tracking-tight">Live Chat</h1>
-            <p className="text-muted-foreground">Chat functionality coming soon.</p>
+        <div className="h-[calc(100vh-2rem)] border rounded-xl overflow-hidden shadow-sm bg-background">
+            <ChatLayout />
         </div>
-    );
+    )
 }

@@ -1,31 +1,24 @@
-import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import React from "react";
 
 export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    // FORCE UPDATE: Ensuring no Sidebar here.
     return (
-        <div className="flex h-screen bg-slate-50 dark:bg-slate-900">
-            {/* Desktop Sidebar */}
-            <div className="hidden md:flex h-full w-64 flex-col fixed inset-y-0 z-50">
-                <Sidebar />
+        <div className="flex flex-col h-full">
+            {/* Mobile Header - Visible only on mobile */}
+            <div className="md:hidden flex items-center mb-6">
+                <MobileNav />
+                <span className="font-bold ml-4">WhatsApp Biz</span>
             </div>
 
-            {/* Main Content */}
-            <main className="flex-1 md:pl-64 flex flex-col h-full overflow-hidden">
-                {/* Mobile Header */}
-                <div className="md:hidden flex items-center p-4 border-b bg-white dark:bg-slate-950">
-                    <MobileNav />
-                    <span className="font-bold ml-4">WhatsApp Biz</span>
-                </div>
-
-                {/* Page Content */}
-                <div className="flex-1 overflow-auto p-8">
-                    {children}
-                </div>
-            </main>
+            {/* Page Content */}
+            <div className="flex-1">
+                {children}
+            </div>
         </div>
     );
 }
