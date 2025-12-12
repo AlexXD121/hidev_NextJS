@@ -17,28 +17,24 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Template } from "@/types"
 
 interface TemplateSelectorProps {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
     onSelect: (template: Template) => void;
 }
 
-export function TemplateSelector({ onSelect }: TemplateSelectorProps) {
-    const [open, setOpen] = useState(false);
+export function TemplateSelector({ open, onOpenChange, onSelect }: TemplateSelectorProps) {
     const { templates, fetchTemplates } = useTemplatesStore();
     const [search, setSearch] = useState("");
 
-    const handleOpen = () => {
-        setOpen(true);
-        if (templates.length === 0) fetchTemplates();
+    const handleOpenChange = (newOpen: boolean) => {
+        onOpenChange(newOpen);
+        if (newOpen && templates.length === 0) fetchTemplates();
     }
 
     const filtered = templates.filter(t => t.name.toLowerCase().includes(search.toLowerCase()));
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="shrink-0" onClick={handleOpen} title="Use Template">
-                    <FileText className="h-5 w-5 text-muted-foreground" />
-                </Button>
-            </DialogTrigger>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Select Template</DialogTitle>
@@ -65,7 +61,7 @@ export function TemplateSelector({ onSelect }: TemplateSelectorProps) {
                                 className="p-3 border rounded-md hover:bg-muted cursor-pointer transition-colors"
                                 onClick={() => {
                                     onSelect(template);
-                                    setOpen(false);
+                                    onOpenChange(false);
                                 }}
                             >
                                 <div className="font-medium text-sm flex justify-between">

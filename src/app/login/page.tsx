@@ -7,176 +7,305 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { MessageSquare, Lock, ArrowRight, CheckCircle2 } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { LayoutDashboard, MessageSquare, BarChart3, Users, Zap, CheckCircle2, ArrowRight, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
+import { cn } from "@/lib/utils"
+// Turbo: Add framer-motion for animations
 import { motion, AnimatePresence } from "framer-motion"
 
+const loginSchema = z.object({
+    email: z.string().email({ message: "Invalid email address" }),
+    password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+})
+
+const registerSchema = loginSchema.extend({
+    fullName: z.string().min(2, { message: "Name must be at least 2 characters" }),
+})
+
 export default function LoginPage() {
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
     const [isLoading, setIsLoading] = useState(false)
+    const [activeTab, setActiveTab] = useState("signin")
     const login = useAuthStore((state) => state.login)
+    const register = useAuthStore((state) => state.register)
     const router = useRouter()
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault()
+    // Form for Login
+    const {
+        register: registerLogin,
+        handleSubmit: handleSubmitLogin,
+        formState: { errors: errorsLogin },
+    } = useForm<z.infer<typeof loginSchema>>({
+        resolver: zodResolver(loginSchema),
+    })
+
+    // Form for Register
+    const {
+        register: registerRegister,
+        handleSubmit: handleSubmitRegister,
+        formState: { errors: errorsRegister },
+    } = useForm<z.infer<typeof registerSchema>>({
+        resolver: zodResolver(registerSchema),
+    })
+
+    const onLogin = async (data: z.infer<typeof loginSchema>) => {
         setIsLoading(true)
-
         try {
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1500))
+            await login(data.email, data.password)
 
-            // Accept any email/password combination
-            await login(email, password)
-            
             toast.success("Welcome back!", {
                 description: "Redirecting to your dashboard...",
-                icon: <CheckCircle2 className="text-green-500" />
+                icon: <CheckCircle2 className="text-emerald-500" />,
             })
-            
+
             router.push("/")
         } catch (error) {
+            console.error(error)
             toast.error("Login failed", {
-                description: "Please try again"
+                description: "Please check your credentials and try again.",
             })
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    const onRegister = async (data: z.infer<typeof registerSchema>) => {
+        setIsLoading(true)
+        try {
+            await register(data.fullName, data.email, data.password)
+
+            toast.success("Account created!", {
+                description: "Welcome to your new workspace.",
+                icon: <CheckCircle2 className="text-emerald-500" />,
+            })
+
+            router.push("/")
+        } catch (error) {
+            console.error(error)
+            toast.error("Registration failed", {
+                description: "Something went wrong. Please try again.",
+            })
+        } finally {
             setIsLoading(false)
         }
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-slate-950 p-4 overflow-hidden relative">
-            {/* Animated Background */}
-            <div className="absolute inset-0 z-0 overflow-hidden">
-                <motion.div
-                    animate={{
-                        scale: [1, 1.2, 1],
-                        rotate: [0, 180, 0],
-                    }}
-                    transition={{
-                        duration: 20,
-                        repeat: Infinity,
-                        ease: "linear"
-                    }}
-                    className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-green-400/20 to-transparent rounded-full blur-3xl opacity-50"
-                />
-                <motion.div
-                    animate={{
-                        scale: [1.2, 1, 1.2],
-                        rotate: [180, 0, 180],
-                    }}
-                    transition={{
-                        duration: 15,
-                        repeat: Infinity,
-                        ease: "linear"
-                    }}
-                    className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-emerald-600/20 to-transparent rounded-full blur-3xl opacity-50"
-                />
-            </div>
+        <div className="grid min-h-screen w-full lg:grid-cols-2">
+            {/* Left Panel - Brand / Features */}
+            <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="hidden h-full flex-col justify-between bg-[#111B21] p-10 text-white lg:flex"
+            >
+                <div className="flex items-center gap-2 text-lg font-medium">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500">
+                        <MessageSquare className="h-5 w-5 text-white" />
+                    </div>
+                    WhatsApp Biz
+                </div>
 
-            <Card className="w-full max-w-md relative z-10 border-0 shadow-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
-                <CardHeader className="space-y-1 text-center pb-8">
-                    <motion.div
-                        initial={{ scale: 0, rotate: -180 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                        className="flex justify-center mb-6"
-                    >
-                        <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-[#25D366] to-[#128C7E] flex items-center justify-center shadow-lg transform rotate-3">
-                            <MessageSquare className="h-8 w-8 text-white fill-current" />
-                        </div>
-                    </motion.div>
-                    <motion.div
+                <div className="space-y-6 max-w-md">
+                    <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
+                        transition={{ delay: 0.2, duration: 0.5 }}
+                        className="text-4xl font-bold tracking-tight"
                     >
-                        <CardTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
-                            WhatsApp Biz
-                        </CardTitle>
-                        <CardDescription className="text-base mt-2">
-                            Sign in to manage your campaigns
-                        </CardDescription>
-                    </motion.div>
-                </CardHeader>
-                <form onSubmit={handleLogin}>
-                    <CardContent className="space-y-4">
-                        <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.3 }}
-                            className="space-y-2"
-                        >
-                            <Label htmlFor="email">Email Address</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                placeholder="name@company.com"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="h-11 bg-white/50 dark:bg-slate-950/50 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-[#25D366] transition-all"
-                            />
-                        </motion.div>
-                        <motion.div
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.4 }}
-                            className="space-y-2"
-                        >
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="password">Password</Label>
-                                <span className="text-xs text-muted-foreground">Admin access only</span>
-                            </div>
-                            <div className="relative">
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="h-11 pl-4 pr-10 bg-white/50 dark:bg-slate-950/50 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-[#25D366] transition-all"
-                                />
-                                <Lock className="absolute right-3 top-3.5 h-4 w-4 text-muted-foreground" />
-                            </div>
-                        </motion.div>
-                    </CardContent>
-                    <CardFooter className="pt-4">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5 }}
-                            className="w-full"
-                        >
-                            <Button
-                                className="w-full h-11 text-base font-medium bg-gradient-to-r from-[#25D366] to-[#128C7E] hover:from-[#20bd5a] hover:to-[#0e6f63] transition-all duration-300 shadow-lg hover:shadow-xl"
-                                type="submit"
-                                disabled={isLoading}
-                            >
-                                {isLoading ? (
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        <span>Signing in...</span>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-2">
-                                        <span>Sign In</span>
-                                        <ArrowRight className="h-4 w-4" />
-                                    </div>
-                                )}
-                            </Button>
-                        </motion.div>
-                    </CardFooter>
-                </form>
-            </Card>
+                        Manage your WhatsApp Empire with ease.
+                    </motion.h1>
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.5 }}
+                        className="text-gray-400 text-lg"
+                    >
+                        The all-in-one platform for automated messaging, customer relationships, and analytics.
+                    </motion.p>
 
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1, duration: 2 }}
-                className="absolute bottom-6 text-xs text-muted-foreground text-center w-full"
-            >
-                &copy; 2024 WhatsApp Business Dashboard
+                    <div className="space-y-4 pt-4">
+                        <FeatureRow icon={BarChart3} title="Advanced Analytics" description="Track delivery rates and engagement in real-time." delay={0.4} />
+                        <FeatureRow icon={Users} title="CRM Integration" description="Seamlessly manage contacts and customer data." delay={0.5} />
+                        <FeatureRow icon={Zap} title="Smart Bots" description="Automate responses with AI-powered chatbots." delay={0.6} />
+                    </div>
+                </div>
+
+                <div className="text-sm text-gray-400">
+                    &copy; 2025 WhatsApp Business Dashboard. All rights reserved.
+                </div>
             </motion.div>
+
+            {/* Right Panel - Login Form */}
+            <div className="flex items-center justify-center bg-background p-8">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]"
+                >
+                    <div className="flex flex-col space-y-2 text-center">
+                        <h1 className="text-2xl font-semibold tracking-tight">
+                            {activeTab === "signin" ? "Welcome back" : "Create an account"}
+                        </h1>
+                        <p className="text-sm text-muted-foreground">
+                            {activeTab === "signin"
+                                ? "Enter your email to sign in to your account"
+                                : "Enter your email below to create your account"}
+                        </p>
+                    </div>
+
+                    <Tabs defaultValue="signin" value={activeTab} onValueChange={setActiveTab} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 mb-4">
+                            <TabsTrigger value="signin">Sign In</TabsTrigger>
+                            <TabsTrigger value="register">Create Account</TabsTrigger>
+                        </TabsList>
+
+                        <AnimatePresence mode="wait">
+                            <TabsContent value="signin" key="signin">
+                                <motion.form
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                    onSubmit={handleSubmitLogin(onLogin)}
+                                    className="space-y-4"
+                                >
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email">Email</Label>
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            placeholder="name@company.com"
+                                            className="focus-visible:ring-emerald-500 transition-all duration-300 hover:border-emerald-400"
+                                            {...registerLogin("email")}
+                                        />
+                                        {errorsLogin.email && (
+                                            <p className="text-sm text-red-500">{errorsLogin.email.message}</p>
+                                        )}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <Label htmlFor="password">Password</Label>
+                                            <a href="#" className="text-sm text-emerald-600 hover:text-emerald-500 font-medium hover:underline">
+                                                Forgot password?
+                                            </a>
+                                        </div>
+                                        <Input
+                                            id="password"
+                                            type="password"
+                                            className="focus-visible:ring-emerald-500 transition-all duration-300 hover:border-emerald-400"
+                                            {...registerLogin("password")}
+                                        />
+                                        {errorsLogin.password && (
+                                            <p className="text-sm text-red-500">{errorsLogin.password.message}</p>
+                                        )}
+                                    </div>
+                                    <Button
+                                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                                        type="submit"
+                                        disabled={isLoading}
+                                    >
+                                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Sign In with Email
+                                    </Button>
+                                </motion.form>
+                            </TabsContent>
+
+                            <TabsContent value="register" key="register">
+                                <motion.form
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                    onSubmit={handleSubmitRegister(onRegister)}
+                                    className="space-y-4"
+                                >
+                                    <div className="space-y-2">
+                                        <Label htmlFor="fullName">Full Name</Label>
+                                        <Input
+                                            id="fullName"
+                                            placeholder="John Doe"
+                                            className="focus-visible:ring-emerald-500 transition-all duration-300 hover:border-emerald-400"
+                                            {...registerRegister("fullName")}
+                                        />
+                                        {errorsRegister.fullName && (
+                                            <p className="text-sm text-red-500">{errorsRegister.fullName.message}</p>
+                                        )}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="register-email">Email</Label>
+                                        <Input
+                                            id="register-email"
+                                            type="email"
+                                            placeholder="name@company.com"
+                                            className="focus-visible:ring-emerald-500 transition-all duration-300 hover:border-emerald-400"
+                                            {...registerRegister("email")}
+                                        />
+                                        {errorsRegister.email && (
+                                            <p className="text-sm text-red-500">{errorsRegister.email.message}</p>
+                                        )}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="register-password">Password</Label>
+                                        <Input
+                                            id="register-password"
+                                            type="password"
+                                            className="focus-visible:ring-emerald-500 transition-all duration-300 hover:border-emerald-400"
+                                            {...registerRegister("password")}
+                                        />
+                                        {errorsRegister.password && (
+                                            <p className="text-sm text-red-500">{errorsRegister.password.message}</p>
+                                        )}
+                                    </div>
+                                    <Button
+                                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                                        type="submit"
+                                        disabled={isLoading}
+                                    >
+                                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Create Account
+                                    </Button>
+                                </motion.form>
+                            </TabsContent>
+                        </AnimatePresence>
+                    </Tabs>
+
+                    <p className="px-8 text-center text-sm text-muted-foreground">
+                        By clicking continue, you agree to our{" "}
+                        <a href="#" className="underline underline-offset-4 hover:text-primary">
+                            Terms of Service
+                        </a>{" "}
+                        and{" "}
+                        <a href="#" className="underline underline-offset-4 hover:text-primary">
+                            Privacy Policy
+                        </a>
+                        .
+                    </p>
+                </motion.div>
+            </div>
         </div>
+    )
+}
+
+function FeatureRow({ icon: Icon, title, description, delay = 0 }: { icon: any, title: string, description: string, delay?: number }) {
+    return (
+        <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay, duration: 0.5 }}
+            className="flex items-start gap-4"
+        >
+            <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 backdrop-blur-sm">
+                <Icon className="h-5 w-5 text-emerald-400" />
+            </div>
+            <div>
+                <h3 className="font-semibold text-white">{title}</h3>
+                <p className="text-sm text-gray-400">{description}</p>
+            </div>
+        </motion.div>
     )
 }

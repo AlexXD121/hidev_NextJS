@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import dynamic from 'next/dynamic'
 import { ActivityItem } from "@/components/dashboard/RecentActivity";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const AnalyticsChart = dynamic(() => import('@/components/dashboard/AnalyticsChart').then(mod => mod.AnalyticsChart), {
   loading: () => <Skeleton className="h-[430px] w-full rounded-xl" />,
@@ -158,6 +159,17 @@ export default function DashboardPage() {
         </>
       </div>
 
+      {/* Quick Actions */}
+      <div>
+        <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
+        <div className="flex flex-wrap gap-3">
+          <QuickActionButton href="/campaigns" icon={Megaphone} label="New Campaign" color="text-purple-500" />
+          <QuickActionButton href="/contacts" icon={Users} label="Add Contact" color="text-emerald-500" />
+          <QuickActionButton href="/chat" icon={MessageSquare} label="Start Chat" color="text-blue-500" />
+          <QuickActionButton href="/templates" icon={MousePointerClick} label="Create Template" color="text-orange-500" />
+        </div>
+      </div>
+
       {/* Charts and Activity Grid */}
       <div className="grid gap-4 grid-cols-1 md:grid-cols-7">
         <div className="col-span-4">
@@ -171,4 +183,19 @@ export default function DashboardPage() {
       </div>
     </div>
   );
+}
+
+function QuickActionButton({ href, icon: Icon, label, color }: { href: string, icon: any, label: string, color: string }) {
+  const router = useRouter()
+  return (
+    <button
+      onClick={() => router.push(href)}
+      className="flex items-center gap-3 bg-card border px-4 py-3 rounded-xl shadow-sm hover:shadow-md transition-all hover:border-primary/50 group"
+    >
+      <div className={`p-2 rounded-lg bg-secondary group-hover:bg-background transition-colors ${color}`}>
+        <Icon className="h-5 w-5" />
+      </div>
+      <span className="font-medium text-sm text-foreground">{label}</span>
+    </button>
+  )
 }

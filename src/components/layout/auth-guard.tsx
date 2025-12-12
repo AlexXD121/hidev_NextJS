@@ -5,16 +5,13 @@ import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/store/useAuthStore"
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-    const { isAuthenticated, checkAuth } = useAuthStore()
+    const { isAuthenticated } = useAuthStore()
     const router = useRouter()
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
         setMounted(true)
-        if (!checkAuth()) {
-            router.push("/login")
-        }
-    }, [checkAuth, router])
+    }, [])
 
     useEffect(() => {
         if (mounted && !isAuthenticated) {
@@ -22,16 +19,20 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         }
     }, [isAuthenticated, router, mounted])
 
+    // Prevent hydration mismatch and show loading state
     if (!mounted) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="flex items-center justify-center min-h-screen bg-background">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#25D366]"></div>
+                    <p className="text-muted-foreground animate-pulse">Loading dashboard...</p>
+                </div>
             </div>
         )
     }
 
     if (!isAuthenticated) {
-        return null
+        return null // Will redirect due to useEffect
     }
 
     return <>{children}</>

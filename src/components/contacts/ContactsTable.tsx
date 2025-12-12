@@ -44,123 +44,8 @@ import { Contact } from "@/types"
 import { useContactsStore } from "@/store/useContactsStore"
 import { toast } from "sonner"
 
+import { ContactDetailsSheet } from "./ContactDetailsSheet"
 import { AddContactForm } from "./AddContactForm"
-
-export const columns: ColumnDef<Contact>[] = [
-    {
-        id: "select",
-        header: ({ table }: HeaderContext<Contact, unknown>) => (
-            <Checkbox
-                checked={
-                    table.getIsAllPageRowsSelected() ||
-                    (table.getIsSomePageRowsSelected() && "indeterminate")
-                }
-                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                aria-label="Select all"
-            />
-        ),
-        cell: ({ row }: CellContext<Contact, unknown>) => (
-            <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-            />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-    },
-    {
-        accessorKey: "name",
-        header: ({ column }: HeaderContext<Contact, unknown>) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Name
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            )
-        },
-        cell: ({ row }: CellContext<Contact, unknown>) => (
-            <div className="flex items-center gap-3">
-                <Avatar className="h-8 w-8">
-                    <AvatarImage src={row.original.avatar} alt={row.getValue("name")} />
-                    <AvatarFallback>{(row.original.name || "C").substring(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <div className="font-medium">{row.getValue("name")}</div>
-            </div>
-        ),
-    },
-    {
-        accessorKey: "phone",
-        header: "Phone",
-        cell: ({ row }: CellContext<Contact, unknown>) => <div>{row.getValue("phone")}</div>,
-    },
-    {
-        accessorKey: "tags",
-        header: "Tags",
-        cell: ({ row }: CellContext<Contact, unknown>) => {
-            const tags = row.getValue("tags") as string[]
-            return (
-                <div className="flex gap-1 flex-wrap">
-                    {tags.map(tag => (
-                        <Badge key={tag} variant="secondary" className="px-1 text-xs">
-                            {tag}
-                        </Badge>
-                    ))}
-                </div>
-            )
-        },
-    },
-    {
-        accessorKey: "lastActive",
-        header: ({ column }: HeaderContext<Contact, unknown>) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Last Active
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            )
-        },
-        cell: ({ row }: CellContext<Contact, unknown>) => {
-            const date = new Date(row.getValue("lastActive"))
-            return <div className="text-muted-foreground text-sm">{date.toLocaleDateString()}</div>
-        },
-    },
-    {
-        id: "actions",
-        enableHiding: false,
-        cell: ({ row }: CellContext<Contact, unknown>) => {
-            const contact = row.original
-
-            return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                            onClick={() => navigator.clipboard.writeText(contact.id)}
-                        >
-                            Copy ID
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>View details</DropdownMenuItem>
-                        <DropdownMenuItem>Start chat</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )
-        },
-    },
-]
 
 interface ContactsTableProps {
     data: Contact[]
@@ -176,6 +61,125 @@ export function ContactsTable({ data }: ContactsTableProps) {
         React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
     const [isAddContactOpen, setIsAddContactOpen] = React.useState(false)
+    const [selectedContact, setSelectedContact] = React.useState<Contact | null>(null)
+
+    const columns = React.useMemo<ColumnDef<Contact>[]>(() => [
+        {
+            id: "select",
+            header: ({ table }: HeaderContext<Contact, unknown>) => (
+                <Checkbox
+                    checked={
+                        table.getIsAllPageRowsSelected() ||
+                        (table.getIsSomePageRowsSelected() && "indeterminate")
+                    }
+                    onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                    aria-label="Select all"
+                />
+            ),
+            cell: ({ row }: CellContext<Contact, unknown>) => (
+                <Checkbox
+                    checked={row.getIsSelected()}
+                    onCheckedChange={(value) => row.toggleSelected(!!value)}
+                    aria-label="Select row"
+                />
+            ),
+            enableSorting: false,
+            enableHiding: false,
+        },
+        {
+            accessorKey: "name",
+            header: ({ column }: HeaderContext<Contact, unknown>) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    >
+                        Name
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                )
+            },
+            cell: ({ row }: CellContext<Contact, unknown>) => (
+                <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                        <AvatarImage src={row.original.avatar} alt={row.getValue("name")} />
+                        <AvatarFallback>{(row.original.name || "C").substring(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="font-medium cursor-pointer hover:underline" onClick={() => setSelectedContact(row.original)}>
+                        {row.getValue("name")}
+                    </div>
+                </div>
+            ),
+        },
+        {
+            accessorKey: "phone",
+            header: "Phone",
+            cell: ({ row }: CellContext<Contact, unknown>) => <div>{row.getValue("phone")}</div>,
+        },
+        {
+            accessorKey: "tags",
+            header: "Tags",
+            cell: ({ row }: CellContext<Contact, unknown>) => {
+                const tags = row.getValue("tags") as string[]
+                return (
+                    <div className="flex gap-1 flex-wrap">
+                        {tags.map(tag => (
+                            <Badge key={tag} variant="secondary" className="px-1 text-xs">
+                                {tag}
+                            </Badge>
+                        ))}
+                    </div>
+                )
+            },
+        },
+        {
+            accessorKey: "lastActive",
+            header: ({ column }: HeaderContext<Contact, unknown>) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    >
+                        Last Active
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                )
+            },
+            cell: ({ row }: CellContext<Contact, unknown>) => {
+                const date = new Date(row.getValue("lastActive"))
+                return <div className="text-muted-foreground text-sm">{date.toLocaleDateString()}</div>
+            },
+        },
+        {
+            id: "actions",
+            enableHiding: false,
+            cell: ({ row }: CellContext<Contact, unknown>) => {
+                const contact = row.original
+
+                return (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem
+                                onClick={() => navigator.clipboard.writeText(contact.id)}
+                            >
+                                Copy ID
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => setSelectedContact(contact)}>View details</DropdownMenuItem>
+                            <DropdownMenuItem>Start chat</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )
+            },
+        },
+    ], [])
 
     // Mock Bulk Actions
     const handleExport = () => {
@@ -199,7 +203,7 @@ export function ContactsTable({ data }: ContactsTableProps) {
     const handleDelete = () => {
         const selectedRows = table.getFilteredSelectedRowModel().rows
         const selectedCount = selectedRows.length
-        
+
         if (confirm(`Are you sure you want to delete ${selectedCount} contacts?`)) {
             selectedRows.forEach(row => {
                 deleteContact(row.original.id)
@@ -275,6 +279,11 @@ export function ContactsTable({ data }: ContactsTableProps) {
                 </div>
             </div>
             <AddContactForm open={isAddContactOpen} onOpenChange={setIsAddContactOpen} />
+            <ContactDetailsSheet
+                contact={selectedContact}
+                open={!!selectedContact}
+                onOpenChange={(open) => !open && setSelectedContact(null)}
+            />
             <div className="rounded-md border bg-card">
                 <Table>
                     <TableHeader>

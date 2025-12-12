@@ -5,17 +5,24 @@ import { FormField, FormItem, FormLabel, FormMessage, FormControl } from "@/comp
 import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { TemplateSelector } from "../TemplateSelector"
+import { TemplateSelector } from "@/components/templates/TemplateSelector"
 import { useState } from "react"
+import { Template } from "@/types"
+import { Button } from "@/components/ui/button"
+import { FileText } from "lucide-react"
 
 export function StepContent() {
     const { control, watch, setValue } = useFormContext()
     const message = watch("message")
     const [activeTab, setActiveTab] = useState("custom")
+    const [isTemplateOpen, setIsTemplateOpen] = useState(false)
 
-    const handleTemplateSelect = (templateId: string, content: string) => {
-        setValue("message", content, { shouldValidate: true })
-        setValue("templateId", templateId)
+    const handleTemplateSelect = (template: Template) => {
+        const text = (template.components?.find(c => c.type === 'BODY' && 'text' in c) as any)?.text || ""
+        setValue("message", text, { shouldValidate: true })
+        setValue("templateId", template.id)
+        setIsTemplateOpen(false)
+        setActiveTab("custom") // Switch back to see the preview
     }
 
     return (
@@ -26,13 +33,25 @@ export function StepContent() {
                     <p className="text-sm text-muted-foreground">Compose the message you want to send.</p>
                 </div>
 
-                <Tabs defaultValue="custom" value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="custom">Write Custom</TabsTrigger>
-                        <TabsTrigger value="template">Choose Template</TabsTrigger>
-                    </TabsList>
+                <div className="flex gap-4 mb-4">
+                    <Button
+                        variant={activeTab === 'custom' ? 'default' : 'outline'}
+                        onClick={() => setActiveTab('custom')}
+                        className="flex-1"
+                    >
+                        Custom Message
+                    </Button>
+                    <Button
+                        variant={activeTab === 'template' ? 'default' : 'outline'}
+                        onClick={() => setIsTemplateOpen(true)}
+                        className="flex-1"
+                    >
+                        <FileText className="mr-2 h-4 w-4" /> Pick Template
+                    </Button>
+                </div>
 
-                    <TabsContent value="custom" className="mt-4">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsContent value="custom" className="mt-0">
                         <FormField
                             control={control}
                             name="message"
@@ -51,14 +70,13 @@ export function StepContent() {
                             )}
                         />
                     </TabsContent>
-
-                    <TabsContent value="template" className="mt-4">
-                        <TemplateSelector
-                            onSelect={handleTemplateSelect}
-                            selectedTemplateId={watch("templateId")}
-                        />
-                    </TabsContent>
                 </Tabs>
+
+                <TemplateSelector
+                    open={isTemplateOpen}
+                    onOpenChange={setIsTemplateOpen}
+                    onSelect={handleTemplateSelect}
+                />
             </div>
 
             <div>

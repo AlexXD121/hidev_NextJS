@@ -10,11 +10,10 @@ import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
-import { TemplateSelector } from "@/components/templates/TemplateSelector"
-import { Textarea } from "@/components/ui/textarea"
 
 export function StepDetails() {
     const { control } = useFormContext()
+
 
     return (
         <div className="space-y-6">
@@ -102,65 +101,7 @@ export function StepDetails() {
                     </FormItem>
                 )}
             />
-            <FormField
-                control={control}
-                name="message"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Message Content</FormLabel>
-                        <FormControl>
-                            <div className="space-y-3">
-                                <div className="flex gap-2">
-                                    <Button
-                                        type="button"
-                                        variant={field.value?.type === 'template' ? 'default' : 'outline'}
-                                        onClick={() => field.onChange({ ...field.value, type: 'template' })}
-                                    >
-                                        Use Template
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant={field.value?.type === 'custom' ? 'default' : 'outline'}
-                                        onClick={() => field.onChange({ ...field.value, type: 'custom' })}
-                                    >
-                                        Custom Message
-                                    </Button>
-                                </div>
-
-                                {field.value?.type === 'template' ? (
-                                    <div className="border p-4 rounded-md">
-                                        <p className="text-sm text-muted-foreground mb-2">Select a template for your campaign.</p>
-                                        <TemplateSelector
-                                            onSelect={(template) => {
-                                                const body = template.components.find(c => c.type === 'BODY' && 'text' in c);
-                                                field.onChange({
-                                                    type: 'template',
-                                                    templateId: template.id,
-                                                    text: body && 'text' in body ? body.text : ''
-                                                });
-                                            }}
-                                        />
-                                        {field.value?.text && (
-                                            <div className="mt-4 p-3 bg-muted rounded text-sm">
-                                                {field.value.text}
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <Textarea
-                                        placeholder="Type your message here..."
-                                        className="min-h-[150px]"
-                                        value={field.value?.text || ''}
-                                        onChange={(e) => field.onChange({ type: 'custom', text: e.target.value })}
-                                    />
-                                )}
-                            </div>
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
+            {/* Message field removed - handled in StepContent */}
         </div>
     )
 }
-

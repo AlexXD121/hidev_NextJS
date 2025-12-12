@@ -94,7 +94,8 @@ export default function CampaignsPage() {
                                             className="flex-1"
                                             size="sm"
                                             variant="secondary"
-                                            disabled
+                                            onClick={() => campaign.status === 'completed' || campaign.status === 'failed' ? window.location.href = `/campaigns/${campaign.id}` : null}
+                                            disabled={campaign.status === 'draft'}
                                         >
                                             {campaign.status === 'draft' ? 'Continue Setup' : 'View Report'}
                                         </Button>

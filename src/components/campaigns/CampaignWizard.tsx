@@ -17,6 +17,14 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useCampaignStore } from "@/store/useCampaignStore"
 
+// Safe: Define default values outside the component to prevent re-creation on every render
+const DEFAULT_VALUES: CampaignFormValues = {
+    name: "",
+    goal: "promotional",
+    recipients: [],
+    message: "",
+}
+
 const STEPS = [
     { id: 1, title: "Details", description: "Basic info" },
     { id: 2, title: "Audience", description: "Select recipients" },
@@ -27,32 +35,36 @@ const STEPS = [
 export function CampaignWizard() {
     const [currentStep, setCurrentStep] = useState(1)
     const router = useRouter()
+    const { addCampaign } = useCampaignStore()
 
     const methods = useForm<CampaignFormValues>({
         resolver: zodResolver(campaignSchema),
+
+        // Safe: Use 'onChange' mode to validate as user types, but state updates are handled by RHF
         mode: "onChange",
-        defaultValues: {
-            name: "",
-            goal: "promotional",
-            recipients: [],
-            message: "",
-        }
+
+        // Safe: Use stable default values
+        defaultValues: DEFAULT_VALUES
     })
 
     const { trigger, handleSubmit } = methods
 
+    // Manual Navigation: Only explicit user action advances the step
     const handleNext = async () => {
         let isValid = false
 
-        // Validate current step fields before moving
-        if (currentStep === 1) {
-            isValid = await trigger(["name", "goal", "scheduledDate"])
-        } else if (currentStep === 2) {
-            isValid = await trigger("recipients")
-        } else if (currentStep === 3) {
-            isValid = await trigger("message")
-        } else {
-            isValid = true
+        switch (currentStep) {
+            case 1:
+                isValid = await trigger(["name", "goal", "scheduledDate"])
+                break
+            case 2:
+                isValid = await trigger("recipients")
+                break
+            case 3:
+                isValid = await trigger("message")
+                break
+            default:
+                isValid = true
         }
 
         if (isValid) {
@@ -64,30 +76,35 @@ export function CampaignWizard() {
         setCurrentStep((prev) => Math.max(prev - 1, 1))
     }
 
-    const { addCampaign } = useCampaignStore()
-
     const onSubmit = (data: CampaignFormValues) => {
-        console.log("Submitting Campaign:", data)
+        try {
+            addCampaign({
+                id: crypto.randomUUID(),
+                name: data.name,
+                status: 'scheduled',
+                sentCount: 0,
+                deliveredCount: 0,
+                readCount: 0,
+                totalContacts: data.recipients.length,
+                createdAt: new Date().toISOString(),
+                templateName: data.templateId ? "Template " + data.templateId : "Custom Message",
+                scheduledDate: data.scheduledDate
+            })
 
-        addCampaign({
-            id: crypto.randomUUID(),
-            name: data.name,
-            status: 'scheduled',
-            sentCount: 0,
-            deliveredCount: 0,
-            readCount: 0,
-            totalContacts: data.recipients.length,
-            createdAt: new Date().toISOString(),
-            templateName: data.templateId ? "Template " + data.templateId : "Custom Message",
-            scheduledDate: data.scheduledDate
-        })
+            toast.success("Campaign Scheduled!", {
+                description: `"${data.name}" has been scheduled successfully.`,
+            })
 
-        toast.success("Campaign Scheduled!", {
-            description: `"${data.name}" has been scheduled successfully.`,
-        })
-        setTimeout(() => {
-            router.push("/campaigns")
-        }, 1500)
+            // Delay navigation slightly to allow toast to be seen
+            setTimeout(() => {
+                router.push("/campaigns")
+            }, 1000)
+        } catch (error) {
+            console.error("Failed to create campaign:", error)
+            toast.error("Error", {
+                description: "Failed to schedule campaign on the server."
+            })
+        }
     }
 
     return (

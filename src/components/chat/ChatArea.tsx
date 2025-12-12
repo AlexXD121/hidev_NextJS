@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { MoreVertical, Paperclip, Search, Smile, Mic, Plus } from "lucide-react"
+import { MoreVertical, Paperclip, Search, Smile, Mic, Plus, MessageSquare } from "lucide-react"
 import { useChatStore } from "@/store/useChatStore"
 import { useCallStore } from "@/store/useCallStore"
 import { MessageBubble } from "./MessageBubble"
@@ -17,7 +17,6 @@ export function ChatArea() {
     const { startCall } = useCallStore()
     const [inputText, setInputText] = useState("")
     const scrollRef = useRef<HTMLDivElement>(null)
-
     const selectedChat = chats.find(c => c.id === selectedChatId)
     const currentMessages = selectedChatId ? messages[selectedChatId] || [] : []
 
@@ -41,32 +40,51 @@ export function ChatArea() {
             handleSend()
         }
     }
+    const [isTemplateOpen, setIsTemplateOpen] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0]
+            // In a real app, upload to storage here. 
+            // We'll simulate a URL using URL.createObjectURL
+            const fakeUrl = URL.createObjectURL(file)
+            sendMessage(selectedChatId!, "Photo", "image", fakeUrl)
+
+            // Allow selecting same file again
+            e.target.value = ''
+        }
+    }
+
+    const handleTemplateSelect = (template: Template) => {
+        // Option 1: Auto-send
+        // sendMessage(selectedChatId!, template.body, 'template')
+
+        // Option 2: Fill input (better for checking params)
+        // Safe access to body using component search only
+        const bodyComponent = template.components?.find(c => c.type === 'BODY' && 'text' in c) as { type: 'BODY', text: string } | undefined
+        const text = bodyComponent?.text || "Template"
+        setInputText(text)
+        setIsTemplateOpen(false)
+    }
 
     if (!selectedChat) {
+        // ... (existing empty state)
         return (
             <div className="flex-1 flex flex-col items-center justify-center bg-[#f0f2f5] dark:bg-[#222e35] h-full border-b-[6px] border-[#25D366]">
                 <div className="text-center max-w-[560px] px-8">
-                    {/* WhatsApp Web Iconic Image Placeholder or SVG */}
                     <div className="mx-auto mb-10">
-                        <img
-                            src="https://static.whatsapp.net/rsrc.php/v3/y6/r/wa6694.svg"
-                            alt="WhatsApp Connected"
-                            className="w-[320px] mx-auto opacity-80 dark:opacity-60"
-                        />
+                        {/* Placeholder for WA logo */}
+                        <div className="w-[320px] h-[200px] mx-auto flex items-center justify-center text-muted-foreground/20">
+                            <MessageSquare className="w-20 h-20" />
+                        </div>
                     </div>
                     <h1 className="text-[32px] font-light text-[#41525d] dark:text-[#e9edef] mb-5">
-                        Download WhatsApp for Windows
+                        WhatsApp Business Dashboard
                     </h1>
-                    <p className="text-[#667781] dark:text-[#8696a0] text-sm leading-6 mb-8">
-                        Make calls, share screens and get a faster experience when you download the Windows app.
+                    <p className="text-[#667781] dark:text-[#8696A0] text-sm leading-6 mb-8">
+                        Select a chat to start messaging, or create a new campaign.
                     </p>
-                    <Button className="rounded-full bg-[#008069] hover:bg-[#006e5a] px-8 py-2">
-                        Get the app
-                    </Button>
-
-                    <div className="mt-16 text-[#8696a0] text-xs flex items-center justify-center gap-1">
-                        <span className="text-[10px]">🔒</span> End-to-end encrypted
-                    </div>
                 </div>
             </div>
         )
@@ -113,11 +131,19 @@ export function ChatArea() {
 
             {/* Input Area */}
             <div className="min-h-[62px] px-4 py-2 bg-secondary border-t border-[#e9edef] dark:border-[#2f3b43] flex items-center gap-2 shrink-0 z-10">
-                <Button variant="ghost" size="icon" className="text-[#54656F] dark:text-[#8696A0] shrink-0">
+                <Button variant="ghost" size="icon" className="text-[#54656F] dark:text-[#8696A0] shrink-0" onClick={() => setIsTemplateOpen(true)}>
                     <Smile className="h-6 w-6" />
                 </Button>
-                <Button variant="ghost" size="icon" className="text-[#54656F] dark:text-[#8696A0] shrink-0">
-                    <Plus className="h-6 w-6" />
+
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*,application/pdf"
+                    onChange={handleFileSelect}
+                />
+                <Button variant="ghost" size="icon" className="text-[#54656F] dark:text-[#8696A0] shrink-0" onClick={() => fileInputRef.current?.click()}>
+                    <Paperclip className="h-6 w-6" />
                 </Button>
 
                 <div className="flex-1 mx-2">
@@ -140,6 +166,12 @@ export function ChatArea() {
                     </Button>
                 )}
             </div>
+
+            <TemplateSelector
+                open={isTemplateOpen}
+                onOpenChange={setIsTemplateOpen}
+                onSelect={handleTemplateSelect}
+            />
         </div>
     )
 }
