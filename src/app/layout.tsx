@@ -4,6 +4,8 @@ import "./globals.css";
 
 import ReactQueryProvider from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider"
+import { GlobalErrorBoundary } from "@/components/ui/error-boundary"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,10 +32,6 @@ export const viewport = {
   shrinkToFit: "no",
 };
 
-import { ThemeProvider } from "@/components/theme-provider"
-import { GlobalErrorBoundary } from "@/components/ui/error-boundary"
-import { CallDialog } from "@/components/chat/CallDialog"
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -42,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex h-screen bg-background text-foreground overflow-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen bg-background text-foreground overflow-hidden`}
       >
         <ReactQueryProvider>
           <ThemeProvider
@@ -53,9 +51,8 @@ export default function RootLayout({
           >
             <GlobalErrorBoundary>
               {children}
-              <CallDialog />
-              <Toaster />
             </GlobalErrorBoundary>
+            <Toaster />
           </ThemeProvider>
         </ReactQueryProvider>
       </body>
