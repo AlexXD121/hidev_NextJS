@@ -1,0 +1,11 @@
+# General
+.DS_Store
+.env
+.env.*
+node_modules/
+venv/
+__pycache__/
+
+# Sub-projects
+client/.next/
+server/__pycache__/
