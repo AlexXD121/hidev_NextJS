@@ -116,3 +116,34 @@ export const MOCK_CAMPAIGNS: Campaign[] = [
         templateName: "new_year_blast",
     },
 ];
+
+export const MOCK_TEMPLATES = [
+    {
+        id: "t1",
+        name: "Welcome Message",
+        category: "marketing",
+        content: "Hi {{name}}, welcome to our service! We're glad to have you with us.",
+        language: "en"
+    },
+    {
+        id: "t2",
+        name: "Order Confirmation",
+        category: "utility",
+        content: "Hello {{name}}, your order #{{order_id}} has been confirmed and will ship soon.",
+        language: "en"
+    },
+    {
+        id: "t3",
+        name: "Diwali Offer",
+        category: "marketing",
+        content: "Happy Diwali {{name}}! Get 50% off on all items this festive season. Shop now!",
+        language: "en"
+    },
+    {
+        id: "t4",
+        name: "Appointment Reminder",
+        category: "utility",
+        content: "Dear {{name}}, this is a reminder for your appointment on {{date}} at {{time}}.",
+        language: "en"
+    }
+];
