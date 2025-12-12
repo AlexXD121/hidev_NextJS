@@ -7,9 +7,19 @@ import { apiService } from "@/lib/api-service";
 import { useChatStore } from "@/store/useChatStore"
 import { useCampaignStore } from "@/store/useCampaignStore"
 import { MOCK_CONTACTS } from "@/lib/mockData"
-import { AnalyticsChart } from "@/components/dashboard/AnalyticsChart";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { toast } from "sonner";
+import dynamic from 'next/dynamic'
+
+const AnalyticsChart = dynamic(() => import('@/components/dashboard/AnalyticsChart').then(mod => mod.AnalyticsChart), {
+  loading: () => <Skeleton className="h-[430px] w-full rounded-xl" />,
+  ssr: false
+})
+
+const RecentActivity = dynamic(() => import('@/components/dashboard/RecentActivity').then(mod => mod.RecentActivity), {
+  loading: () => <Skeleton className="h-[430px] w-full rounded-xl" />,
+  ssr: false
+})
 
 export default function DashboardPage() {
   const { chats } = useChatStore()
@@ -25,7 +35,7 @@ export default function DashboardPage() {
   const totalRead = campaigns.reduce((acc, c) => acc + c.readCount, 0)
   const responseRate = totalSent > 0 ? Math.round((totalRead / totalSent) * 100) : 0
 
-  const { data: chartData, isLoading: chartLoading } = useQuery({
+  const { data: chartData, isLoading: chartLoading, error: chartError } = useQuery({
     queryKey: ["dashboard-chart"],
     queryFn: apiService.fetchChartData,
     refetchInterval: 5000,
@@ -36,6 +46,11 @@ export default function DashboardPage() {
     queryFn: apiService.fetchRecentActivity,
     refetchInterval: 5000,
   });
+
+  // Handle errors with Toasts
+  if (chartError) {
+    toast.error("Failed to load chart data", { description: "Please try again later." });
+  }
 
   return (
     <div className="space-y-6">
@@ -81,19 +96,11 @@ export default function DashboardPage() {
       {/* Charts and Activity Grid */}
       <div className="grid gap-4 grid-cols-1 md:grid-cols-7">
         <div className="col-span-4">
-          {chartLoading || !chartData ? (
-            <Skeleton className="h-[430px] w-full rounded-xl" />
-          ) : (
-            <AnalyticsChart data={chartData} />
-          )}
+          <AnalyticsChart data={chartData || []} />
         </div>
 
         <div className="col-span-3">
-          {activityLoading || !recentActivity ? (
-            <Skeleton className="h-[430px] w-full rounded-xl" />
-          ) : (
-            <RecentActivity activities={recentActivity} />
-          )}
+          <RecentActivity activities={recentActivity || []} />
         </div>
       </div>
     </div>

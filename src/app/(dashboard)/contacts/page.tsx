@@ -1,7 +1,16 @@
+"use client";
+
+import { useEffect } from "react";
 import { ContactsTable } from "@/components/contacts/ContactsTable";
-import { MOCK_CONTACTS } from "@/lib/mockData";
+import { useContactsStore } from "@/store/useContactsStore";
 
 export default function ContactsPage() {
+    const { contacts, fetchContacts, isLoading } = useContactsStore();
+
+    useEffect(() => {
+        fetchContacts();
+    }, [fetchContacts]);
+
     return (
         <div className="h-full flex-1 flex-col space-y-8 p-8 md:flex">
             <div className="flex items-center justify-between space-y-2">
@@ -12,7 +21,11 @@ export default function ContactsPage() {
                     </p>
                 </div>
             </div>
-            <ContactsTable data={MOCK_CONTACTS} />
+            {isLoading && contacts.length === 0 ? (
+                <div className="text-center py-10">Loading contacts...</div>
+            ) : (
+                <ContactsTable data={contacts} />
+            )}
         </div>
     );
 }

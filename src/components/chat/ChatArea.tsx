@@ -8,6 +8,8 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { MoreVertical, Paperclip, Phone, Send, Video, Image as ImageIcon } from "lucide-react"
 import { useChatStore } from "@/store/useChatStore"
 import { MessageBubble } from "./MessageBubble"
+import { TemplateSelector } from "@/components/templates/TemplateSelector"
+import { Template, TemplateComponent } from "@/types"
 
 export function ChatArea() {
     const { selectedChatId, chats, messages, sendMessage, receiveMessage } = useChatStore()
@@ -135,6 +137,16 @@ export function ChatArea() {
                     <Button size="icon" className="shrink-0" onClick={handleSend}>
                         <Send className="h-4 w-4" />
                     </Button>
+                    <TemplateSelector
+                        onSelect={(template: Template) => {
+                            // In a real app, this would likely insert variables if needed
+                            // For now, we just insert the body text
+                            const body = template.components.find((c: TemplateComponent) => c.type === 'BODY' && 'text' in c);
+                            if (body && 'text' in body) {
+                                setInputText(body.text);
+                            }
+                        }}
+                    />
                 </div>
             </div>
         </div>

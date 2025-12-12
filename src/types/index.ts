@@ -50,3 +50,28 @@ export interface Campaign {
     goal?: string;
     scheduledDate?: Date;
 }
+
+export interface Template {
+    id: string;
+    name: string;
+    language: string;
+    status: "approved" | "pending" | "rejected";
+    category: "MARKETING" | "UTILITY" | "AUTHENTICATION";
+    components: TemplateComponent[];
+    lastUpdated: string; // ISO Date string
+    usageCount?: number;
+}
+
+export type TemplateComponent =
+    | { type: "HEADER"; format: "TEXT" | "IMAGE" | "VIDEO" | "DOCUMENT"; text?: string; mediaUrl?: string }
+    | { type: "BODY"; text: string; example?: { body_text: string[][] } }
+    | { type: "FOOTER"; text: string }
+    | { type: "BUTTONS"; buttons: TemplateButton[] };
+
+export interface TemplateButton {
+    type: "QUICK_REPLY" | "PHONE_NUMBER" | "URL";
+    text: string;
+    phoneNumber?: string;
+    url?: string;
+}
+

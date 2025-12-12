@@ -1,89 +1,141 @@
-import { create } from 'zustand'
-import { ChatSession, Message } from '@/types'
-import { MOCK_CHATS, MOCK_MSG_HISTORY } from '@/lib/mockData'
+import { create } from 'zustand';
+import { ChatSession, Message } from '@/types';
+import { api } from '@/lib/api/client';
 
 interface ChatState {
-    selectedChatId: string | null
-    chats: ChatSession[]
-    messages: Record<string, Message[]>
-    setSelectedChatId: (id: string | null) => void
-    sendMessage: (chatId: string, text: string, type?: 'text' | 'image', mediaUrl?: string) => void
-    receiveMessage: (chatId: string, message: Message) => void
-}
+    selectedChatId: string | null;
+    chats: ChatSession[];
+    messages: Record<string, Message[]>;
+    isLoading: boolean;
+    searchQuery: string;
 
-const initialMessages: Record<string, Message[]> = {}
-MOCK_CHATS.forEach(chat => {
-    // FIX: Load history if available, otherwise just the last message
-    // @ts-ignore
-    if (MOCK_MSG_HISTORY[chat.id]) {
-        // @ts-ignore
-        initialMessages[chat.id] = MOCK_MSG_HISTORY[chat.id]
-    } else if (chat.lastMessage) {
-        initialMessages[chat.id] = [chat.lastMessage]
-    } else {
-        initialMessages[chat.id] = []
-    }
-})
+    // Actions
+    selectChat: (chatId: string) => void;
+    fetchChats: () => Promise<void>;
+    fetchMessages: (chatId: string) => Promise<void>;
+    sendMessage: (chatId: string, text: string, type?: 'text' | 'image' | 'document' | 'template', mediaUrl?: string) => Promise<void>;
+    receiveMessage: (chatId: string, message: Message) => void;
+    setSearchQuery: (query: string) => void;
+}
 
 export const useChatStore = create<ChatState>((set, get) => ({
     selectedChatId: null,
-    chats: MOCK_CHATS,
-    messages: initialMessages,
+    chats: [],
+    messages: {},
+    isLoading: false,
+    searchQuery: '',
 
-    setSelectedChatId: (id) => set((state) => {
-        // When opening a chat, mark as read (reset unread count)
-        const updatedChats = state.chats.map(chat =>
-            chat.id === id ? { ...chat, unreadCount: 0 } : chat
-        )
-        return { selectedChatId: id, chats: updatedChats }
-    }),
+    selectChat: (chatId) => {
+        set({ selectedChatId: chatId });
+        get().fetchMessages(chatId);
+        // Mark as read immediately when selected
+        api.chat.markAsRead(chatId).then(() => {
+            set(state => ({
+                chats: state.chats.map(c =>
+                    c.id === chatId ? { ...c, unreadCount: 0 } : c
+                )
+            }));
+        });
+    },
 
-    sendMessage: (chatId, text, type = 'text', mediaUrl) => set((state) => {
-        const newMessage: Message = {
-            id: Date.now().toString(),
-            chatId,
-            senderId: 'me',
-            text,
-            timestamp: new Date().toISOString(),
-            status: 'sent',
-            type,
-            mediaUrl
+    fetchChats: async () => {
+        set({ isLoading: true });
+        try {
+            const chats = await api.chat.getChats();
+            set({ chats, isLoading: false });
+        } catch (error) {
+            console.error("Failed to fetch chats", error);
+            set({ isLoading: false });
         }
+    },
 
-        const chatMessages = state.messages[chatId] || []
+    fetchMessages: async (chatId) => {
+        // If already loaded for this chat, don't re-fetch unless forced (optimization)
+        if (get().messages[chatId]) return;
 
-        // Update chat list preview
-        const updatedChats = state.chats.map((chat) =>
-            chat.id === chatId
-                ? { ...chat, lastMessage: newMessage, unreadCount: 0 } // Sent messages don't add check count
-                : chat
-        )
-
-        return {
-            chats: updatedChats,
-            messages: { ...state.messages, [chatId]: [...chatMessages, newMessage] }
-        }
-    }),
-
-    receiveMessage: (chatId, message) => set((state) => {
-        const chatMessages = state.messages[chatId] || []
-
-        // Only increment unread if we are NOT currently looking at this chat
-        const isChatActive = state.selectedChatId === chatId
-
-        const updatedChats = state.chats.map((chat) =>
-            chat.id === chatId
-                ? {
-                    ...chat,
-                    lastMessage: message,
-                    unreadCount: isChatActive ? 0 : chat.unreadCount + 1
+        try {
+            const msgs = await api.chat.getMessages(chatId);
+            set(state => ({
+                messages: {
+                    ...state.messages,
+                    [chatId]: msgs
                 }
-                : chat
-        )
-
-        return {
-            chats: updatedChats,
-            messages: { ...state.messages, [chatId]: [...chatMessages, message] }
+            }));
+        } catch (error) {
+            console.error("Failed to fetch messages", error);
         }
-    })
-}))
+    },
+
+    sendMessage: async (chatId, text, type = 'text', mediaUrl) => {
+        try {
+            // Optimistic update
+            const tempId = `temp-${Date.now()}`;
+            const optimisitcMsg: Message = {
+                id: tempId,
+                chatId,
+                senderId: 'me',
+                text,
+                timestamp: new Date().toISOString(),
+                status: 'sent',
+                type,
+                mediaUrl
+            };
+
+            set(state => ({
+                messages: {
+                    ...state.messages,
+                    [chatId]: [...(state.messages[chatId] || []), optimisitcMsg]
+                },
+                // Update last message in chat list
+                chats: state.chats.map(c =>
+                    c.id === chatId ? { ...c, lastMessage: optimisitcMsg, status: 'active' } : c
+                )
+            }));
+
+            // Actual API call
+            const sentMsg = await api.chat.sendMessage(chatId, text, type, mediaUrl);
+
+            // Replace optimistic message with real one
+            set(state => ({
+                messages: {
+                    ...state.messages,
+                    [chatId]: state.messages[chatId].map(m => m.id === tempId ? sentMsg : m)
+                },
+                chats: state.chats.map(c =>
+                    c.id === chatId ? { ...c, lastMessage: sentMsg } : c
+                )
+            }));
+
+        } catch (error) {
+            console.error("Failed to send message", error);
+        }
+    },
+
+    receiveMessage: (chatId, message) => {
+        set(state => {
+            // Only add if not already present (dedup)
+            const chatMessages = state.messages[chatId] || [];
+            if (chatMessages.some(m => m.id === message.id)) return state;
+
+            return {
+                messages: {
+                    ...state.messages,
+                    [chatId]: [...chatMessages, message]
+                },
+                chats: state.chats.map(c => {
+                    if (c.id === chatId) {
+                        return {
+                            ...c,
+                            lastMessage: message,
+                            unreadCount: state.selectedChatId === chatId ? 0 : (c.unreadCount || 0) + 1,
+                            status: 'active'
+                        };
+                    }
+                    return c;
+                })
+            };
+        });
+    },
+
+    setSearchQuery: (query) => set({ searchQuery: query }),
+}));
