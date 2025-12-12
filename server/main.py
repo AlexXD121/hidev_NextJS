@@ -8,9 +8,10 @@ from contextlib import asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Connect to MongoDB
     await init_db()
+    print("Startup: Connected to Database")
     yield
     # Shutdown
-    pass
+    print("Shutdown: Database connection closed")
 
 app = FastAPI(lifespan=lifespan)
 
@@ -31,4 +32,4 @@ app.include_router(chat.router, prefix="/api")
 
 @app.get("/")
 def read_root():
-    return {"message": "WhatsApp Dashboard API (MongoDB) is running"}
+    return {"message": "WhatsApp Dashboard API is running"}

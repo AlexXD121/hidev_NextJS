@@ -8,12 +8,12 @@ def create_token(user_id: str):
 
 @router.post("/login", response_model=AuthResponse)
 async def login(request: LoginRequest):
-    # Find user by email
+    # Find user
     user = await User.find_one(User.email == request.email)
     
     if not user:
         if request.password == "password123":
-            # Create demo user
+            # Auto-register demo user
             user = User(
                 name="Demo User", 
                 email=request.email, 
@@ -23,10 +23,11 @@ async def login(request: LoginRequest):
             await user.insert()
         else:
             raise HTTPException(status_code=401, detail="Invalid credentials")
-            
-    # Mock password check
-    if user.password_hash != "hashed_secret" and request.password != "password":
-         pass 
+    
+    # Verify password (mock)
+    if user.password_hash != "hashed_secret" and request.password != "password" and request.password != "password123":
+        # Allow specific demo passwords
+        pass
 
     return AuthResponse(user=user, token=create_token(user.id))
 
@@ -39,7 +40,7 @@ async def register(request: RegisterRequest):
     new_user = User(
         name=request.name,
         email=request.email,
-        password_hash="hashed_secret",
+        password_hash="hashed_secret", # In real app, hash this!
         role="agent"
     )
     await new_user.insert()

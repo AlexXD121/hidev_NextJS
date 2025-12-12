@@ -6,8 +6,7 @@ router = APIRouter(prefix="/contacts", tags=["contacts"])
 
 @router.get("/", response_model=List[Contact])
 async def get_contacts():
-    contacts = await Contact.find_all().to_list()
-    return contacts
+    return await Contact.find_all().to_list()
 
 @router.post("/", response_model=Contact)
 async def create_contact(contact: Contact):
@@ -16,7 +15,7 @@ async def create_contact(contact: Contact):
 
 @router.delete("/{contact_id}")
 async def delete_contact(contact_id: str):
-    contact = await Contact.find_one(Contact.id == contact_id)
+    contact = await Contact.get(contact_id)
     if not contact:
         raise HTTPException(status_code=404, detail="Contact not found")
     await contact.delete()
