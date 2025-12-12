@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiService } from "@/lib/api-service";
 import { useChatStore } from "@/store/useChatStore"
 import { useCampaignStore } from "@/store/useCampaignStore"
-import { MOCK_CONTACTS } from "@/lib/mockData"
+import { useContactsStore } from "@/store/useContactsStore"
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import dynamic from 'next/dynamic'
@@ -24,10 +24,11 @@ const RecentActivity = dynamic(() => import('@/components/dashboard/RecentActivi
 export default function DashboardPage() {
   const { chats } = useChatStore()
   const { campaigns } = useCampaignStore()
+  const { contacts } = useContactsStore()
 
   // Calculate dynamic stats
   const activeChats = chats.filter(c => c.status === 'active').length
-  const totalContacts = MOCK_CONTACTS.length // Or from a useContactStore if we had one
+  const totalContacts = contacts.length
   const sentCampaigns = campaigns.filter(c => c.status === 'sent' || c.status === 'completed').length
 
   // Mock response rate logic for now, or derive from campaigns
@@ -53,7 +54,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Dashboard Overview</h1>
         <p className="text-muted-foreground">Welcome back to your command center.</p>

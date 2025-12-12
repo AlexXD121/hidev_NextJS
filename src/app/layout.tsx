@@ -19,14 +19,20 @@ export const metadata: Metadata = {
   title: "WhatsApp Business Dashboard",
   description: "Manage your WhatsApp campaigns and chats",
   manifest: "/manifest.json",
+};
+
+export const viewport = {
   themeColor: "#25D366",
-  viewport: "minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, viewport-fit=cover",
+  width: "device-width",
+  initialScale: 1,
+  minimumScale: 1,
+  viewportFit: "cover",
+  shrinkToFit: "no",
 };
 
 import { ThemeProvider } from "@/components/theme-provider"
 import { GlobalErrorBoundary } from "@/components/ui/error-boundary"
-
-/* ... imports ... */
+import { CallDialog } from "@/components/chat/CallDialog"
 
 export default function RootLayout({
   children,
@@ -47,6 +53,7 @@ export default function RootLayout({
           >
             <GlobalErrorBoundary>
               {children}
+              <CallDialog />
               <Toaster />
             </GlobalErrorBoundary>
           </ThemeProvider>

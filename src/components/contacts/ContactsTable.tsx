@@ -41,6 +41,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Contact } from "@/types"
+import { useContactsStore } from "@/store/useContactsStore"
+import { toast } from "sonner"
 
 import { AddContactForm } from "./AddContactForm"
 
@@ -165,6 +167,7 @@ interface ContactsTableProps {
 }
 
 export function ContactsTable({ data }: ContactsTableProps) {
+    const { deleteContact } = useContactsStore()
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
         []
@@ -194,9 +197,14 @@ export function ContactsTable({ data }: ContactsTableProps) {
     }
 
     const handleDelete = () => {
-        const selectedCount = table.getFilteredSelectedRowModel().rows.length
+        const selectedRows = table.getFilteredSelectedRowModel().rows
+        const selectedCount = selectedRows.length
+        
         if (confirm(`Are you sure you want to delete ${selectedCount} contacts?`)) {
-            console.log("Deleting selected contacts")
+            selectedRows.forEach(row => {
+                deleteContact(row.original.id)
+            })
+            toast.success(`${selectedCount} contact(s) deleted successfully`)
             setRowSelection({})
         }
     }

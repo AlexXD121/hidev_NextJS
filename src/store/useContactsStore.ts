@@ -1,6 +1,7 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { Contact } from '@/types';
-import { api } from '@/lib/api/client';
+import { MOCK_CONTACTS } from '@/lib/mockData';
 
 interface ContactsState {
     contacts: Contact[];
@@ -10,72 +11,64 @@ interface ContactsState {
 
     // Actions
     fetchContacts: () => Promise<void>;
-    addContact: (contact: Omit<Contact, 'id'>) => Promise<void>;
-    updateContact: (id: string, updates: Partial<Contact>) => Promise<void>;
-    deleteContact: (id: string) => Promise<void>;
+    addContact: (contact: Omit<Contact, 'id'>) => void;
+    updateContact: (id: string, updates: Partial<Contact>) => void;
+    deleteContact: (id: string) => void;
     setFilterQuery: (query: string) => void;
     setFilterTags: (tags: string[]) => void;
 }
 
-export const useContactsStore = create<ContactsState>((set, get) => ({
-    contacts: [],
-    isLoading: false,
-    filterQuery: '',
-    filterTags: [],
+export const useContactsStore = create<ContactsState>()(
+    persist(
+        (set, get) => ({
+            contacts: MOCK_CONTACTS,
+            isLoading: false,
+            filterQuery: '',
+            filterTags: [],
 
-    fetchContacts: async () => {
-        set({ isLoading: true });
-        try {
-            const contacts = await api.contacts.getContacts();
-            set({ contacts, isLoading: false });
-        } catch (error) {
-            console.error("Failed to fetch contacts", error);
-            set({ isLoading: false });
+            fetchContacts: async () => {
+                set({ isLoading: true });
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 500));
+                set({ isLoading: false });
+            },
+
+            addContact: (contactData) => {
+                const newContact: Contact = {
+                    ...contactData,
+                    id: `contact-${Date.now()}`,
+                    lastActive: new Date().toISOString(),
+                };
+                
+                set(state => ({
+                    contacts: [...state.contacts, newContact]
+                }));
+            },
+
+            updateContact: (id, updates) => {
+                set(state => ({
+                    contacts: state.contacts.map(contact =>
+                        contact.id === id 
+                            ? { ...contact, ...updates }
+                            : contact
+                    )
+                }));
+            },
+
+            deleteContact: (id) => {
+                set(state => ({
+                    contacts: state.contacts.filter(contact => contact.id !== id)
+                }));
+            },
+
+            setFilterQuery: (query) => set({ filterQuery: query }),
+            setFilterTags: (tags) => set({ filterTags: tags }),
+        }),
+        {
+            name: 'contacts-storage',
+            partialize: (state) => ({
+                contacts: state.contacts
+            })
         }
-    },
-
-    addContact: async (contact) => {
-        set({ isLoading: true });
-        try {
-            const newContact = await api.contacts.createContact(contact);
-            set(state => ({
-                contacts: [...state.contacts, newContact],
-                isLoading: false
-            }));
-        } catch (error) {
-            console.error("Failed to add contact", error);
-            set({ isLoading: false });
-        }
-    },
-
-    updateContact: async (id, updates) => {
-        set({ isLoading: true });
-        try {
-            const updated = await api.contacts.updateContact(id, updates);
-            set(state => ({
-                contacts: state.contacts.map(c => c.id === id ? updated : c),
-                isLoading: false
-            }));
-        } catch (error) {
-            console.error("Failed to update contact", error);
-            set({ isLoading: false });
-        }
-    },
-
-    deleteContact: async (id) => {
-        set({ isLoading: true });
-        try {
-            await api.contacts.deleteContact(id);
-            set(state => ({
-                contacts: state.contacts.filter(c => c.id !== id),
-                isLoading: false
-            }));
-        } catch (error) {
-            console.error("Failed to delete contact", error);
-            set({ isLoading: false });
-        }
-    },
-
-    setFilterQuery: (query) => set({ filterQuery: query }),
-    setFilterTags: (tags) => set({ filterTags: tags }),
-}));
+    )
+);

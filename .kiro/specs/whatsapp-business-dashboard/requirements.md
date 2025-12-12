@@ -113,7 +113,63 @@ The system aims to provide real-time insights into business communications, stre
 5. WHEN navigating THEN the system SHALL provide smooth transitions and loading states
 6. WHEN using the application THEN the system SHALL maintain consistent UI patterns following Shadcn design system
 
-### Requirement 8: Innovation Features
+### Requirement 8: Functional Authentication System
+
+**User Story:** As a user, I want a working authentication system that protects the dashboard and persists my login state, so that I can securely access the application and maintain my session across browser sessions.
+
+#### Acceptance Criteria
+
+1. WHEN I submit valid credentials on the login page THEN the system SHALL authenticate me with any email/password combination
+2. WHEN authentication succeeds THEN the system SHALL generate and store a fake JWT token using Zustand persist middleware
+3. WHEN authentication succeeds THEN the system SHALL redirect me to the dashboard homepage
+4. WHEN I access protected routes without authentication THEN the system SHALL redirect me to the login page
+5. WHEN user refreshes the page THEN the session SHALL persist using zustand/persist middleware
+6. WHEN I log out THEN the system SHALL clear the stored token and redirect to login
+7. WHEN the dashboard layout loads THEN the system SHALL be wrapped with an authentication guard component
+
+### Requirement 9: Interactive Contact Management
+
+**User Story:** As a user, I want the "Add Contact" functionality to actually work and update the contacts table in real-time, so that I can manage my contact list effectively.
+
+#### Acceptance Criteria
+
+1. WHEN I fill out the Add Contact form THEN the system SHALL validate the input fields
+2. WHEN I submit a valid contact form THEN the system SHALL add the contact to the contacts store
+3. WHEN a contact is successfully added THEN the system SHALL close the dialog automatically
+4. WHEN a contact is successfully added THEN the system SHALL display a success toast message with the contact's name
+5. WHEN a new contact is added THEN the contacts table SHALL immediately display the new row without page refresh
+6. WHEN the contacts table loads THEN the system SHALL read contact data directly from the contacts store
+7. WHEN adding a contact fails THEN the system SHALL display appropriate error messages
+
+### Requirement 10: Real-Time Chat Simulation
+
+**User Story:** As a user, I want realistic chat interactions where the other person responds to my messages, so that I can experience a fully functional chat interface.
+
+#### Acceptance Criteria
+
+1. WHEN I send a message THEN the system SHALL add it to the conversation immediately
+2. WHEN a user sends a message THEN the system SHALL automatically reply after a 2-4 second delay with a mock response (e.g., "Thanks!")
+3. WHEN the system generates a response THEN it SHALL use contextual mock replies like "Thanks for the update!" or "Can you send more details?"
+4. WHEN a response is being generated THEN the system SHALL display a "Typing..." indicator during the delay
+5. WHEN the typing indicator appears THEN it SHALL show for 1-2 seconds before the actual message
+6. WHEN messages are exchanged THEN the system SHALL maintain proper conversation flow and message ordering
+7. WHEN the chat store receives new messages THEN the UI SHALL update automatically to show the new messages
+
+### Requirement 11: Video and Voice Call Interface
+
+**User Story:** As a user, I want to initiate video and voice calls from the chat interface, so that I can access communication options beyond text messaging.
+
+#### Acceptance Criteria
+
+1. WHEN viewing a chat conversation THEN the system SHALL display Phone and Video call icons in the chat header
+2. WHEN I click the Phone icon THEN the system SHALL open a voice call simulation dialog
+3. WHEN I click the Video icon THEN the system SHALL open a video call simulation dialog  
+4. WHEN the call button is clicked THEN a Dialog SHALL appear showing a "Calling..." animation with the user's avatar
+5. WHEN in a call dialog THEN the system SHALL provide an "End Call" button to close the modal
+6. WHEN I click "End Call" THEN the system SHALL close the call dialog and return to the chat interface
+7. WHEN call icons are displayed THEN they SHALL be positioned next to the contact's name in the chat header
+
+### Requirement 12: Innovation Features
 
 **User Story:** As a business owner, I want advanced AI-powered features and intelligent insights, so that I can optimize customer communications and improve business outcomes.
 

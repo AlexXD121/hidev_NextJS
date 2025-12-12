@@ -1,6 +1,7 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { Campaign } from '@/types';
-import { api } from '@/lib/api/client';
+import { MOCK_CAMPAIGNS } from '@/lib/mockData';
 
 interface CampaignStore {
     campaigns: Campaign[];
@@ -8,82 +9,74 @@ interface CampaignStore {
 
     // Actions
     fetchCampaigns: () => Promise<void>;
-    createCampaign: (campaign: Omit<Campaign, 'id' | 'createdAt' | 'status' | 'sentCount' | 'deliveredCount' | 'readCount'>) => Promise<void>;
-    duplicateCampaign: (id: string) => Promise<void>;
-    deleteCampaign: (id: string) => Promise<void>;
-    updateCampaignStatus: (id: string, status: Campaign['status']) => Promise<void>;
-    startSimulation: (id: string) => void; // Keeps simulation logic for now, or could move to API
-    addCampaign: (campaign: Campaign) => void; // Keep for backward compatibility if needed, or remove
+    createCampaign: (campaign: Omit<Campaign, 'id' | 'createdAt' | 'status' | 'sentCount' | 'deliveredCount' | 'readCount'>) => void;
+    duplicateCampaign: (id: string) => void;
+    deleteCampaign: (id: string) => void;
+    updateCampaignStatus: (id: string, status: Campaign['status']) => void;
+    startSimulation: (id: string) => void;
+    addCampaign: (campaign: Campaign) => void;
 }
 
-export const useCampaignStore = create<CampaignStore>((set, get) => ({
-    campaigns: [],
-    isLoading: false,
+export const useCampaignStore = create<CampaignStore>()(
+    persist(
+        (set, get) => ({
+            campaigns: MOCK_CAMPAIGNS,
+            isLoading: false,
 
-    fetchCampaigns: async () => {
-        set({ isLoading: true });
-        try {
-            const campaigns = await api.campaigns.getCampaigns();
-            set({ campaigns, isLoading: false });
-        } catch (error) {
-            console.error("Failed to fetch campaigns", error);
-            set({ isLoading: false });
-        }
-    },
+            fetchCampaigns: async () => {
+                set({ isLoading: true });
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 500));
+                set({ isLoading: false });
+            },
 
-    createCampaign: async (campaignData) => {
-        set({ isLoading: true });
-        try {
-            const newCampaign = await api.campaigns.createCampaign(campaignData);
-            set(state => ({
-                campaigns: [...state.campaigns, newCampaign],
-                isLoading: false
-            }));
-        } catch (error) {
-            console.error("Failed to create campaign", error);
-            set({ isLoading: false });
-        }
-    },
+            createCampaign: (campaignData) => {
+                const newCampaign: Campaign = {
+                    ...campaignData,
+                    id: `cmp-${Date.now()}`,
+                    createdAt: new Date().toISOString(),
+                    status: 'draft',
+                    sentCount: 0,
+                    deliveredCount: 0,
+                    readCount: 0,
+                };
+                
+                set(state => ({
+                    campaigns: [...state.campaigns, newCampaign]
+                }));
+            },
 
-    duplicateCampaign: async (id) => {
-        set({ isLoading: true });
-        try {
-            const duplicated = await api.campaigns.duplicateCampaign(id);
-            set(state => ({
-                campaigns: [...state.campaigns, duplicated],
-                isLoading: false
-            }));
-        } catch (error) {
-            console.error("Failed to duplicate campaign", error);
-            set({ isLoading: false });
-        }
-    },
+            duplicateCampaign: (id) => {
+                const original = get().campaigns.find(c => c.id === id);
+                if (!original) return;
 
-    deleteCampaign: async (id) => {
-        set({ isLoading: true });
-        try {
-            await api.campaigns.deleteCampaign(id);
-            set(state => ({
-                campaigns: state.campaigns.filter(c => c.id !== id),
-                isLoading: false
-            }));
-        } catch (error) {
-            console.error("Failed to delete campaign", error);
-            set({ isLoading: false });
-        }
-    },
+                const duplicated: Campaign = {
+                    ...original,
+                    id: `cmp-${Date.now()}`,
+                    name: `${original.name} (Copy)`,
+                    status: 'draft',
+                    createdAt: new Date().toISOString(),
+                    sentCount: 0,
+                    deliveredCount: 0,
+                    readCount: 0
+                };
+                
+                set(state => ({
+                    campaigns: [...state.campaigns, duplicated]
+                }));
+            },
 
-    updateCampaignStatus: async (id, status) => {
-        // Optimistic
-        set(state => ({
-            campaigns: state.campaigns.map(c => c.id === id ? { ...c, status } : c)
-        }));
-        try {
-            await api.campaigns.updateCampaign(id, { status });
-        } catch (error) {
-            console.error("Failed to update status", error);
-        }
-    },
+            deleteCampaign: (id) => {
+                set(state => ({
+                    campaigns: state.campaigns.filter(c => c.id !== id)
+                }));
+            },
+
+            updateCampaignStatus: (id, status) => {
+                set(state => ({
+                    campaigns: state.campaigns.map(c => c.id === id ? { ...c, status } : c)
+                }));
+            },
 
     // Kept for compatibility but should rely on createCampaign
     addCampaign: (campaign) => {
@@ -120,9 +113,8 @@ export const useCampaignStore = create<CampaignStore>((set, get) => ({
                 campaigns: state.campaigns.map(c => c.id === id ? { ...c, ...updatedStats } : c)
             }));
 
-            // Sync with backend occasionally or at end? 
-            // For now, we update backend at every step (might be too frequent for real app)
-            api.campaigns.updateCampaign(id, updatedStats).catch(console.error);
+            // In a real app, we would sync with backend here
+            // For now, we just update local state
 
             if (newSent >= current.totalContacts && newDelivered >= current.totalContacts) {
                 get().updateCampaignStatus(id, 'completed')
@@ -130,4 +122,12 @@ export const useCampaignStore = create<CampaignStore>((set, get) => ({
             }
         }, 1000)
     }
-}));
+        }),
+        {
+            name: 'campaigns-storage',
+            partialize: (state) => ({
+                campaigns: state.campaigns
+            })
+        }
+    )
+);

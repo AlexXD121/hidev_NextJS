@@ -23,6 +23,8 @@ import {
     SheetTitle,
 } from "@/components/ui/sheet"
 import { useEffect } from "react"
+import { useContactsStore } from "@/store/useContactsStore"
+import { toast } from "sonner"
 
 const formSchema = z.object({
     name: z.string().min(2, {
@@ -40,6 +42,7 @@ interface AddContactFormProps {
 }
 
 export function AddContactForm({ open, onOpenChange }: AddContactFormProps) {
+    const { addContact } = useContactsStore()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -57,10 +60,22 @@ export function AddContactForm({ open, onOpenChange }: AddContactFormProps) {
     }, [open, form])
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        // In a real app, we would make an API call here.
-        // For now, we'll just log it and close the modal.
-        console.log(values)
-        onOpenChange(false)
+        try {
+            const contactData = {
+                name: values.name,
+                phone: values.phone,
+                tags: values.tags ? values.tags.split(',').map(tag => tag.trim()) : [],
+                lastActive: new Date().toISOString(),
+                email: undefined,
+                avatar: undefined
+            }
+            
+            addContact(contactData)
+            toast.success(`Contact ${values.name} added successfully`)
+            onOpenChange(false)
+        } catch (error) {
+            toast.error("Failed to add contact")
+        }
     }
 
     return (

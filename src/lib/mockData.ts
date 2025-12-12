@@ -1,4 +1,4 @@
-import { User, Contact, ChatSession, Campaign, Message } from "@/types";
+import { User, Contact, ChatSession, Campaign, Message, Template } from "@/types";
 
 export const CURRENT_USER: User = {
     id: "u1",
@@ -153,29 +153,87 @@ export const MOCK_TEMPLATES = [
     {
         id: "t1",
         name: "Welcome Message",
-        category: "marketing",
-        content: "Hi {{name}}, welcome to our service! We're glad to have you with us.",
-        language: "en"
+        language: "en",
+        status: "approved" as const,
+        category: "MARKETING" as const,
+        lastUpdated: "2023-10-27T10:00:00Z",
+        usageCount: 15,
+        components: [
+            {
+                type: "BODY" as const,
+                text: "Hi {{1}}, welcome to our service! We're glad to have you with us.",
+                example: { body_text: [["John"]] }
+            }
+        ]
     },
     {
         id: "t2",
         name: "Order Confirmation",
-        category: "utility",
-        content: "Hello {{name}}, your order #{{order_id}} has been confirmed and will ship soon.",
-        language: "en"
+        language: "en",
+        status: "approved" as const,
+        category: "UTILITY" as const,
+        lastUpdated: "2023-10-27T09:00:00Z",
+        usageCount: 32,
+        components: [
+            {
+                type: "BODY" as const,
+                text: "Hello {{1}}, your order #{{2}} has been confirmed and will ship soon.",
+                example: { body_text: [["John", "12345"]] }
+            }
+        ]
     },
     {
         id: "t3",
         name: "Diwali Offer",
-        category: "marketing",
-        content: "Happy Diwali {{name}}! Get 50% off on all items this festive season. Shop now!",
-        language: "en"
+        language: "en",
+        status: "approved" as const,
+        category: "MARKETING" as const,
+        lastUpdated: "2023-10-26T15:00:00Z",
+        usageCount: 8,
+        components: [
+            {
+                type: "HEADER" as const,
+                format: "TEXT" as const,
+                text: "🎉 Special Diwali Offer!"
+            },
+            {
+                type: "BODY" as const,
+                text: "Happy Diwali {{1}}! Get 50% off on all items this festive season. Shop now!",
+                example: { body_text: [["John"]] }
+            },
+            {
+                type: "FOOTER" as const,
+                text: "Valid until November 15th"
+            }
+        ]
     },
     {
         id: "t4",
         name: "Appointment Reminder",
-        category: "utility",
-        content: "Dear {{name}}, this is a reminder for your appointment on {{date}} at {{time}}.",
-        language: "en"
+        language: "en",
+        status: "approved" as const,
+        category: "UTILITY" as const,
+        lastUpdated: "2023-10-25T12:00:00Z",
+        usageCount: 24,
+        components: [
+            {
+                type: "BODY" as const,
+                text: "Dear {{1}}, this is a reminder for your appointment on {{2}} at {{3}}.",
+                example: { body_text: [["John", "November 1st", "2:00 PM"]] }
+            },
+            {
+                type: "BUTTONS" as const,
+                buttons: [
+                    {
+                        type: "QUICK_REPLY" as const,
+                        text: "Confirm"
+                    },
+                    {
+                        type: "QUICK_REPLY" as const,
+                        text: "Reschedule"
+                    }
+                ]
+            }
+        ]
     }
 ];

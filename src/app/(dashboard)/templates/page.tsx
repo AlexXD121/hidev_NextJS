@@ -2,7 +2,7 @@ import TemplatesList from "@/components/templates/TemplatesList";
 
 export default function TemplatesPage() {
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 p-8">
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Templates</h1>

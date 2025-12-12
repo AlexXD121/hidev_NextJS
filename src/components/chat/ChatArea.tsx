@@ -7,14 +7,15 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { MoreVertical, Paperclip, Phone, Send, Video, Image as ImageIcon } from "lucide-react"
 import { useChatStore } from "@/store/useChatStore"
+import { useCallStore } from "@/store/useCallStore"
 import { MessageBubble } from "./MessageBubble"
 import { TemplateSelector } from "@/components/templates/TemplateSelector"
 import { Template, TemplateComponent } from "@/types"
 
 export function ChatArea() {
-    const { selectedChatId, chats, messages, sendMessage, receiveMessage } = useChatStore()
+    const { selectedChatId, chats, messages, sendMessage, receiveMessage, typingIndicators } = useChatStore()
+    const { startCall } = useCallStore()
     const [inputText, setInputText] = useState("")
-    const [isSimulatingResponse, setIsSimulatingResponse] = useState(false)
     const scrollRef = useRef<HTMLDivElement>(null)
 
     const selectedChat = chats.find(c => c.id === selectedChatId)
@@ -32,24 +33,6 @@ export function ChatArea() {
 
         sendMessage(selectedChatId, inputText)
         setInputText("")
-
-        // Simulation: Echo response
-        if (!isSimulatingResponse) {
-            setIsSimulatingResponse(true)
-            setTimeout(() => {
-                const responseMessage = {
-                    id: (Date.now() + 1).toString(),
-                    chatId: selectedChatId,
-                    senderId: selectedChatId, // sender is the contact
-                    text: `Echo: You said "${inputText}"`,
-                    timestamp: new Date().toISOString(),
-                    status: 'read' as const,
-                    type: 'text' as const
-                }
-                receiveMessage(selectedChatId, responseMessage)
-                setIsSimulatingResponse(false)
-            }, 1500)
-        }
     }
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -81,15 +64,23 @@ export function ChatArea() {
                     <div>
                         <h3 className="font-semibold text-sm">{selectedChat.contact.name}</h3>
                         <span className="text-xs text-muted-foreground">
-                            {isSimulatingResponse ? "Typing..." : "Online"}
+                            {selectedChatId && typingIndicators[selectedChatId] ? "Typing..." : "Online"}
                         </span>
                     </div>
                 </div>
                 <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => startCall('video', selectedChat.contactId, selectedChat.contact.name)}
+                    >
                         <Video className="h-5 w-5 text-muted-foreground" />
                     </Button>
-                    <Button variant="ghost" size="icon">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => startCall('voice', selectedChat.contactId, selectedChat.contact.name)}
+                    >
                         <Phone className="h-5 w-5 text-muted-foreground" />
                     </Button>
                     <Button variant="ghost" size="icon">
@@ -99,7 +90,7 @@ export function ChatArea() {
             </div>
 
             {/* Messages */}
-            <ScrollArea className="flex-1 p-4 bg-muted/20">
+            <ScrollArea className="flex-1 p-4 bg-chat">
                 <div className="flex flex-col justify-end min-h-full">
                     {currentMessages.map((msg) => (
                         <MessageBubble key={msg.id} message={msg} isMe={msg.senderId === 'me'} />

@@ -139,37 +139,104 @@ This 7-day implementation plan transforms the WhatsApp Business Dashboard design
   - [x] Build campaign duplication functionality for reusing successful campaigns
   - _Requirements: 4.8_
 
-## ( later implimentation )Day 6: Innovation Features (The X-Factor)
+## Day 6: Functional Interactivity Implementation
 
-- [ ] 6.1 Implement AI Reply Suggestions system
+- [ ] 6.1 Implement functional authentication system
+  - [ ] 6.1.1 Update useAuthStore with persist middleware for state persistence
+    - Modify `src/store/useAuthStore.ts` to accept any email/password combination
+    - Add fake JWT token generation and storage using Zustand persist
+    - Implement login method that sets user data and authentication state
+    - _Requirements: 8.1, 8.2, 8.5_
+  
+  - [ ] 6.1.2 Connect login page to authentication store
+    - Update `src/app/login/page.tsx` to integrate with useAuthStore
+    - Add form submission handler that calls store login method
+    - Implement redirect to dashboard on successful authentication
+    - Add error handling for login failures with toast notifications
+    - _Requirements: 8.3_
+  
+  - [ ] 6.1.3 Create and implement authentication guard
+    - Build `src/components/layout/auth-guard.tsx` component
+    - Add authentication check that redirects unauthenticated users to login
+    - Wrap dashboard layout with AuthGuard component
+    - Implement persistent authentication state checking on app load
+    - _Requirements: 8.4, 8.6, 8.7_
+
+- [ ] 6.2 Build interactive contact management functionality
+  - [ ] 6.2.1 Connect Add Contact form to contacts store
+    - Update `src/components/contacts/AddContactForm.tsx` onSubmit handler
+    - Integrate form submission with `useContactsStore.addContact` method
+    - Add form validation and error handling for contact creation
+    - _Requirements: 9.1, 9.7_
+  
+  - [ ] 6.2.2 Implement real-time contact table updates
+    - Ensure `src/components/contacts/ContactsTable.tsx` reads from useContactsStore
+    - Add automatic table refresh when new contacts are added
+    - Implement success toast notification with contact name on successful addition
+    - Add dialog auto-close functionality after successful contact creation
+    - _Requirements: 9.2, 9.3, 9.4, 9.5_
+
+- [ ] 6.3 Create real-time chat simulation system
+  - [ ] 6.3.1 Enhance chat store with auto-response functionality
+    - Update `src/store/useChatStore.ts` sendMessage method
+    - Add setTimeout mechanism for delayed auto-responses (2-4 seconds)
+    - Implement receiveMessage method for generating mock replies
+    - Create contextual response generator with realistic replies
+    - _Requirements: 10.1, 10.2, 10.3, 10.6_
+  
+  - [ ] 6.3.2 Add typing indicator functionality
+    - Add typing state management to chat store
+    - Implement typing indicator UI component in chat area
+    - Add 1-2 second typing simulation before auto-response
+    - Ensure proper message ordering and conversation flow
+    - _Requirements: 10.4, 10.5, 10.7_
+
+- [ ] 6.4 Implement video and voice call interface
+  - [ ] 6.4.1 Add call buttons to chat header
+    - Update `src/components/chat/ChatArea.tsx` header section
+    - Add Phone and Video icons from lucide-react next to contact name
+    - Implement click handlers for call initiation
+    - Style call buttons appropriately in chat interface
+    - _Requirements: 11.1, 11.2, 11.3, 11.7_
+  
+  - [ ] 6.4.2 Create call simulation dialog
+    - Build call dialog component with "Calling [Name]..." display
+    - Add pulsing avatar animation for realistic call experience
+    - Implement "End Call" button functionality to close modal
+    - Add call duration timer and call type indicators
+    - _Requirements: 11.4, 11.5, 11.6_
+
+## Day 7: Innovation Features (The X-Factor)
+
+- [ ] 7.1 Implement AI Reply Suggestions system
   - Create AIReplyService for generating contextual response suggestions
   - Build ReplySuggestions component displaying AI-generated options
   - Implement conversation context analysis for relevant suggestions
   - Add suggestion categories (greeting, question, support, closing) with confidence scores
-  - _Requirements: 8.1_
+  - _Requirements: 12.1_
 
-- [ ] 6.2 Build Sentiment Analysis for customer conversations
+- [ ] 7.2 Build Sentiment Analysis for customer conversations
   - Create SentimentAnalyzer service for message mood detection
   - Implement sentiment scoring (-1 to 1) with positive/neutral/negative labels
   - Add sentiment indicators in chat interface and contact profiles
   - Build sentiment analytics dashboard showing customer mood trends
-  - _Requirements: 8.2_
+  - _Requirements: 12.2_
 
-- [ ] 6.3 Create Optimal Timing Calculator for campaigns
+- [ ] 7.3 Create Optimal Timing Calculator for campaigns
   - Build TimingOptimizer service analyzing historical engagement patterns
   - Implement best time recommendations based on contact interaction history
   - Add optimal timing suggestions in campaign creation wizard
   - Create engagement pattern analytics showing peak response times
-  - _Requirements: 8.3_
+  - _Requirements: 12.3_
 
-- [ ] 6.4 Implement predictive analytics and lead scoring
+- [ ] 7.4 Implement predictive analytics and lead scoring
   - Create lead scoring algorithm based on engagement frequency and sentiment
   - Build predictive insights for customer behavior patterns
   - Add automated contact prioritization based on engagement scores
   - Implement conversion probability indicators for sales contacts
-  - _Requirements: 8.4, 8.5_
+  - _Requirements: 12.4, 12.5_
 
-## Day 7: Polish and Production Readiness
+## Day 8: Polish and Production Readiness
 
 - [x] 7.1 Implement dark mode theme system
   - [x] Integrate next-themes for seamless light/dark mode switching

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { Template } from '@/types';
-import { api } from '@/lib/api/client';
+import { MOCK_TEMPLATES } from '@/lib/mockData';
 
 interface TemplatesState {
     templates: Template[];
@@ -12,55 +13,57 @@ interface TemplatesState {
     fetchTemplates: () => Promise<void>;
     setSearchQuery: (query: string) => void;
     setFilterCategory: (category: string | null) => void;
-    addTemplate: (template: Omit<Template, 'id' | 'status' | 'lastUpdated' | 'usageCount'>) => Promise<void>;
-    updateTemplate: (id: string, updates: Partial<Template>) => Promise<void>;
+    addTemplate: (template: Omit<Template, 'id' | 'status' | 'lastUpdated' | 'usageCount'>) => void;
+    updateTemplate: (id: string, updates: Partial<Template>) => void;
 }
 
-export const useTemplatesStore = create<TemplatesState>((set, get) => ({
-    templates: [],
-    isLoading: false,
-    searchQuery: '',
-    filterCategory: null,
+export const useTemplatesStore = create<TemplatesState>()(
+    persist(
+        (set, get) => ({
+            templates: MOCK_TEMPLATES,
+            isLoading: false,
+            searchQuery: '',
+            filterCategory: null,
 
-    fetchTemplates: async () => {
-        set({ isLoading: true });
-        try {
-            const templates = await api.templates.getTemplates();
-            set({ templates, isLoading: false });
-        } catch (error) {
-            console.error("Failed to fetch templates", error);
-            set({ isLoading: false });
+            fetchTemplates: async () => {
+                set({ isLoading: true });
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 500));
+                set({ isLoading: false });
+            },
+
+            setSearchQuery: (query) => set({ searchQuery: query }),
+            setFilterCategory: (category) => set({ filterCategory: category }),
+
+            addTemplate: (templateData) => {
+                const newTemplate: Template = {
+                    ...templateData,
+                    id: `tpl-${Date.now()}`,
+                    status: 'pending',
+                    lastUpdated: new Date().toISOString(),
+                    usageCount: 0
+                };
+                
+                set(state => ({
+                    templates: [...state.templates, newTemplate]
+                }));
+            },
+
+            updateTemplate: (id, updates) => {
+                set(state => ({
+                    templates: state.templates.map(t => 
+                        t.id === id 
+                            ? { ...t, ...updates, lastUpdated: new Date().toISOString() }
+                            : t
+                    )
+                }));
+            },
+        }),
+        {
+            name: 'templates-storage',
+            partialize: (state) => ({
+                templates: state.templates
+            })
         }
-    },
-
-    setSearchQuery: (query) => set({ searchQuery: query }),
-    setFilterCategory: (category) => set({ filterCategory: category }),
-
-    addTemplate: async (template) => {
-        set({ isLoading: true });
-        try {
-            const newTemplate = await api.templates.createTemplate(template);
-            set(state => ({
-                templates: [...state.templates, newTemplate],
-                isLoading: false
-            }));
-        } catch (error) {
-            console.error("Failed to add template", error);
-            set({ isLoading: false });
-        }
-    },
-
-    updateTemplate: async (id, updates) => {
-        set({ isLoading: true });
-        try {
-            const updated = await api.templates.updateTemplate(id, updates);
-            set(state => ({
-                templates: state.templates.map(t => t.id === id ? updated : t),
-                isLoading: false
-            }));
-        } catch (error) {
-            console.error("Failed to update template", error);
-            set({ isLoading: false });
-        }
-    },
-}));
+    )
+);

@@ -24,10 +24,10 @@ export default function TemplatesList() {
         fetchTemplates();
     }, [fetchTemplates]);
 
-    const filteredTemplates = templates.filter(template => {
+    const filteredTemplates = (templates || []).filter(template => {
         const matchesCategory = filterCategory && filterCategory !== "ALL" ? template.category === filterCategory : true;
         const matchesSearch = template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            template.components.some(c => 'text' in c && c.text?.toLowerCase().includes(searchQuery.toLowerCase()));
+            (template.components || []).some(c => 'text' in c && c.text?.toLowerCase().includes(searchQuery.toLowerCase()));
         return matchesCategory && matchesSearch;
     });
 
@@ -117,7 +117,15 @@ export default function TemplatesList() {
                                 <div className="text-xs text-muted-foreground flex items-center gap-2">
                                     <span>{template.language}</span>
                                     <span>•</span>
-                                    <span>Updated {formatDistanceToNow(new Date(template.lastUpdated))} ago</span>
+                                    <span>Updated {(() => {
+                                        try {
+                                            const date = new Date(template.lastUpdated);
+                                            if (isNaN(date.getTime())) return "Unknown date";
+                                            return formatDistanceToNow(date) + " ago";
+                                        } catch (e) {
+                                            return "Unknown date";
+                                        }
+                                    })()}</span>
                                 </div>
                             </CardHeader>
                             <CardContent className="pb-3">

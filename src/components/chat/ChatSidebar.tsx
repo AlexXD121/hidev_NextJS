@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 
 export function ChatSidebar() {
-    const { chats, selectedChatId, setSelectedChatId } = useChatStore()
+    const { chats, selectedChatId, selectChat } = useChatStore()
 
     return (
         <div className="flex flex-col h-full border-r bg-muted/10 w-full md:w-[320px] lg:w-[360px]">
@@ -29,7 +29,7 @@ export function ChatSidebar() {
                     {chats.map((chat) => (
                         <button
                             key={chat.id}
-                            onClick={() => setSelectedChatId(chat.id)}
+                            onClick={() => selectChat(chat.id)}
                             className={cn(
                                 "flex items-center gap-3 p-3 rounded-lg text-left transition-colors hover:bg-muted/50",
                                 selectedChatId === chat.id && "bg-muted"

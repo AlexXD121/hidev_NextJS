@@ -45,11 +45,30 @@ import { ModeToggle } from "@/components/mode-toggle"
 import Image from "next/image"
 import { useAuthStore } from "@/store/useAuthStore"
 
+function LogoutButton() {
+  const logout = useAuthStore((state) => state.logout)
+
+  const handleLogout = () => {
+    logout()
+    window.location.href = "/login"
+  }
+
+  return (
+    <button
+      onClick={handleLogout}
+      className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+    >
+      <LogOut className="h-5 w-5" />
+      Logout
+    </button>
+  )
+}
+
 export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <div className="flex h-screen w-64 flex-col shrink-0 border-r bg-background text-foreground transition-all duration-300">
+    <div className="flex h-screen w-64 flex-col shrink-0 border-r bg-secondary text-foreground transition-all duration-300">
       <div className="flex items-center gap-3 px-6 py-8 group cursor-pointer">
         <div className="relative h-10 w-10 rounded-xl overflow-hidden shadow-sm transition-all duration-500 ease-out group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(37,211,102,0.5)] group-hover:-rotate-6 border border-transparent group-hover:border-[#25D366]/30">
           <Image
@@ -106,17 +125,7 @@ export function Sidebar() {
           <ModeToggle />
         </div>
 
-        <button
-          onClick={() => {
-            const { logout } = useAuthStore.getState()
-            logout()
-            window.location.href = "/login"
-          }}
-          className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-        >
-          <LogOut className="h-5 w-5" />
-          Logout
-        </button>
+        <LogoutButton />
       </div>
     </div>
   )
