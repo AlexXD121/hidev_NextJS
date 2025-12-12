@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { api } from '@/lib/api'
 
 interface User {
     id: string
@@ -33,27 +34,15 @@ export const useAuthStore = create<AuthStore>()(
             login: async (email: string, password: string) => {
                 set({ isLoading: true, error: null })
                 try {
-                    // Simulate network delay
-                    await new Promise(resolve => setTimeout(resolve, 1500))
-
-                    // MOCK LOGIC: Accept any valid email/password
-                    // In a real app, this would be an API call
-                    const fakeToken = `fake-jwt-token-${Date.now()}`
-                    const fakeUser: User = {
-                        id: Math.random().toString(36).substring(7),
-                        name: email.split('@')[0] || 'Demo User',
-                        email: email,
-                        avatar: 'https://github.com/shadcn.png',
-                        role: 'admin'
-                    }
-
+                    const { user, token } = await api.auth.login(email, password);
                     set({
-                        user: fakeUser,
-                        token: fakeToken,
+                        user,
+                        token,
                         isAuthenticated: true,
                         isLoading: false
                     })
                 } catch (error) {
+                    console.error("Login error:", error);
                     set({ error: 'Login failed', isLoading: false })
                     throw error
                 }

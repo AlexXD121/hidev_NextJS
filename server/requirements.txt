@@ -1,4 +1,11 @@
 fastapi
 uvicorn
+motor
+beanie
 pydantic
 python-multipart
+passlib[bcrypt]
+pyjwt
+dnspython
+pymongo[srv]
+python-dotenv
