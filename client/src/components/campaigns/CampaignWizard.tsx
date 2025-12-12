@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { campaignSchema, CampaignFormValues } from "@/lib/validators/campaign"
@@ -17,7 +17,6 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useCampaignStore } from "@/store/useCampaignStore"
 
-// Safe: Define default values outside the component to prevent re-creation on every render
 const DEFAULT_VALUES: CampaignFormValues = {
     name: "",
     goal: "promotional",
@@ -39,17 +38,12 @@ export function CampaignWizard() {
 
     const methods = useForm<CampaignFormValues>({
         resolver: zodResolver(campaignSchema),
-
-        // Safe: Use 'onChange' mode to validate as user types, but state updates are handled by RHF
         mode: "onChange",
-
-        // Safe: Use stable default values
         defaultValues: DEFAULT_VALUES
     })
 
     const { trigger, handleSubmit } = methods
 
-    // Manual Navigation: Only explicit user action advances the step
     const handleNext = async () => {
         let isValid = false
 
@@ -68,7 +62,7 @@ export function CampaignWizard() {
         }
 
         if (isValid) {
-            setCurrentStep((prev) => Math.min(prev + 1, STEPS.length))
+            setCurrentStep((prev) => Math.min(prev + 1, 4))
         }
     }
 
@@ -95,7 +89,6 @@ export function CampaignWizard() {
                 description: `"${data.name}" has been scheduled successfully.`,
             })
 
-            // Delay navigation slightly to allow toast to be seen
             setTimeout(() => {
                 router.push("/campaigns")
             }, 1000)

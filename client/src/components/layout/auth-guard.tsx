@@ -1,12 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { useAuthStore } from "@/store/useAuthStore"
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-    const { isAuthenticated } = useAuthStore()
+    const { isAuthenticated, isLoading } = useAuthStore()
     const router = useRouter()
+    const pathname = usePathname()
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -14,13 +15,16 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }, [])
 
     useEffect(() => {
-        if (mounted && !isAuthenticated) {
+        if (!mounted) return
+
+        // Prevent infinite redirect loop if already on login
+        if (!isAuthenticated && !isLoading && pathname !== "/login") {
             router.push("/login")
         }
-    }, [isAuthenticated, router, mounted])
+    }, [isAuthenticated, isLoading, router, mounted, pathname])
 
-    // Prevent hydration mismatch and show loading state
-    if (!mounted) {
+    // Specific check to allow rendering if authenticated or if strictly loading
+    if (!mounted || isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-background">
                 <div className="flex flex-col items-center gap-4">
@@ -32,7 +36,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }
 
     if (!isAuthenticated) {
-        return null // Will redirect due to useEffect
+        return null // Will redirect via useEffect
     }
 
     return <>{children}</>

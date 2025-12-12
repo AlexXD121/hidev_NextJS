@@ -14,7 +14,6 @@ import { cn } from "@/lib/utils"
 export function StepDetails() {
     const { control } = useFormContext()
 
-
     return (
         <div className="space-y-6">
             <div>
@@ -101,7 +100,6 @@ export function StepDetails() {
                     </FormItem>
                 )}
             />
-            {/* Message field removed - handled in StepContent */}
         </div>
     )
 }

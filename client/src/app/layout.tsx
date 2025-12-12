@@ -6,6 +6,7 @@ import ReactQueryProvider from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider"
 import { GlobalErrorBoundary } from "@/components/ui/error-boundary"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,9 +50,11 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <GlobalErrorBoundary>
-              {children}
-            </GlobalErrorBoundary>
+            <TooltipProvider>
+              <GlobalErrorBoundary>
+                {children}
+              </GlobalErrorBoundary>
+            </TooltipProvider>
             <Toaster />
           </ThemeProvider>
         </ReactQueryProvider>
