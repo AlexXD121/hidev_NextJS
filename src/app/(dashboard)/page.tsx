@@ -4,17 +4,26 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 import { Users, MessageSquare, Megaphone, MousePointerClick } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiService } from "@/lib/api-service";
+import { useChatStore } from "@/store/useChatStore"
+import { useCampaignStore } from "@/store/useCampaignStore"
+import { MOCK_CONTACTS } from "@/lib/mockData"
 import { AnalyticsChart } from "@/components/dashboard/AnalyticsChart";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 
 export default function DashboardPage() {
-  // Poll every 5 seconds for all data
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["dashboard-stats"],
-    queryFn: apiService.fetchDashboardStats,
-    refetchInterval: 5000,
-  });
+  const { chats } = useChatStore()
+  const { campaigns } = useCampaignStore()
+
+  // Calculate dynamic stats
+  const activeChats = chats.filter(c => c.status === 'active').length
+  const totalContacts = MOCK_CONTACTS.length // Or from a useContactStore if we had one
+  const sentCampaigns = campaigns.filter(c => c.status === 'sent' || c.status === 'completed').length
+
+  // Mock response rate logic for now, or derive from campaigns
+  const totalSent = campaigns.reduce((acc, c) => acc + c.sentCount, 0)
+  const totalRead = campaigns.reduce((acc, c) => acc + c.readCount, 0)
+  const responseRate = totalSent > 0 ? Math.round((totalRead / totalSent) * 100) : 0
 
   const { data: chartData, isLoading: chartLoading } = useQuery({
     queryKey: ["dashboard-chart"],
@@ -37,42 +46,36 @@ export default function DashboardPage() {
 
       {/* Stats Cards Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {statsLoading || !stats ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-[120px] w-full rounded-xl" />
-          ))
-        ) : (
-          <>
-            <StatsCard
-              title="Total Contacts"
-              value={stats.totalContacts}
-              icon={Users}
-              trend="+12% from last month"
-              trendUp={true}
-            />
-            <StatsCard
-              title="Active Chats"
-              value={stats.activeChats}
-              icon={MessageSquare}
-              trend={"+5 new today"}
-              trendUp={true}
-            />
-            <StatsCard
-              title="Campaigns Sent"
-              value={stats.sentCampaigns}
-              icon={Megaphone}
-              trend="+2 this week"
-              trendUp={true}
-            />
-            <StatsCard
-              title="Total Read"
-              value={`${stats.responseRate}%`}
-              icon={MousePointerClick}
-              trend="+4.3% engagement"
-              trendUp={true}
-            />
-          </>
-        )}
+        <>
+          <StatsCard
+            title="Total Contacts"
+            value={totalContacts}
+            icon={Users}
+            trend="+12% from last month"
+            trendUp={true}
+          />
+          <StatsCard
+            title="Active Chats"
+            value={activeChats}
+            icon={MessageSquare}
+            trend={"+5 new today"}
+            trendUp={true}
+          />
+          <StatsCard
+            title="Campaigns Sent"
+            value={sentCampaigns}
+            icon={Megaphone}
+            trend="+2 this week"
+            trendUp={true}
+          />
+          <StatsCard
+            title="Total Read"
+            value={`${responseRate}%`}
+            icon={MousePointerClick}
+            trend="+4.3% engagement"
+            trendUp={true}
+          />
+        </>
       </div>
 
       {/* Charts and Activity Grid */}

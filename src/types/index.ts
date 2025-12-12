@@ -39,11 +39,14 @@ export interface ChatSession {
 export interface Campaign {
     id: string;
     name: string;
-    status: "draft" | "scheduled" | "sent" | "failed";
+    status: "draft" | "scheduled" | "sent" | "sending" | "completed" | "failed";
     sentCount: number;
     deliveredCount: number;
     readCount: number;
     totalContacts: number;
     createdAt: string;
-    templateName: string;
+    templateName?: string;
+    templateId?: string;
+    goal?: string;
+    scheduledDate?: Date;
 }

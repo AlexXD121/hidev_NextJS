@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { ChatSession, Message } from '@/types'
-import { MOCK_CHATS } from '@/lib/mockData'
+import { MOCK_CHATS, MOCK_MSG_HISTORY } from '@/lib/mockData'
 
 interface ChatState {
     selectedChatId: string | null
@@ -13,7 +13,12 @@ interface ChatState {
 
 const initialMessages: Record<string, Message[]> = {}
 MOCK_CHATS.forEach(chat => {
-    if (chat.lastMessage) {
+    // FIX: Load history if available, otherwise just the last message
+    // @ts-ignore
+    if (MOCK_MSG_HISTORY[chat.id]) {
+        // @ts-ignore
+        initialMessages[chat.id] = MOCK_MSG_HISTORY[chat.id]
+    } else if (chat.lastMessage) {
         initialMessages[chat.id] = [chat.lastMessage]
     } else {
         initialMessages[chat.id] = []

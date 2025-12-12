@@ -1,18 +1,6 @@
 import { create } from 'zustand'
 import { MOCK_CAMPAIGNS } from '@/lib/mockData'
-
-export interface Campaign {
-    id: string
-    name: string
-    status: 'scheduled' | 'sending' | 'completed' | 'failed' | 'draft'
-    sentCount: number
-    deliveredCount: number
-    readCount: number
-    totalContacts: number
-    createdAt: string
-    templateName?: string
-    scheduledDate?: Date
-}
+import { Campaign } from '@/types'
 
 interface CampaignStore {
     campaigns: Campaign[]

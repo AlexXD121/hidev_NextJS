@@ -40,7 +40,7 @@ export default function CampaignsPage() {
                 {campaigns.map((campaign) => (
                     <Card key={campaign.id}>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium truncat pr-2">
+                            <CardTitle className="text-sm font-medium truncate pr-2">
                                 {campaign.name}
                             </CardTitle>
                             <Badge variant={

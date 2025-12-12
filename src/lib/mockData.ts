@@ -65,6 +65,38 @@ const MOCK_MESSAGES: Record<string, Message> = {
     },
 };
 
+export const MOCK_MSG_HISTORY: Record<string, Message[]> = {
+    chat1: [
+        {
+            id: "h1",
+            chatId: "chat1",
+            senderId: "c1",
+            text: "Hi there, I saw your ad on Instagram.",
+            timestamp: "2023-10-27T10:25:00Z",
+            status: "read",
+            type: "text"
+        },
+        {
+            id: "h2",
+            chatId: "chat1",
+            senderId: "me",
+            text: "Hello! Thanks for reaching out. How can I help you today?",
+            timestamp: "2023-10-27T10:26:00Z",
+            status: "read",
+            type: "text"
+        },
+        {
+            id: "m1",
+            chatId: "chat1",
+            senderId: "c1",
+            text: "Hey, I had a question about the pricing plan.",
+            timestamp: "2023-10-27T10:30:00Z",
+            status: "read",
+            type: "text",
+        }
+    ]
+}
+
 export const MOCK_CHATS: ChatSession[] = [
     {
         id: "chat1",
