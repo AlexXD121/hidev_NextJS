@@ -12,7 +12,10 @@ async def verify_system():
     print(f"{Fore.CYAN}🚀 Starting System Cross-Verification (Direct DB Mode)...{Style.RESET_ALL}\n")
 
     # Connect to DB (using workaround settings from database.py/seed_data.py)
-    MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://doadmin:4098K67i2XfA51jZ@db-mongodb-blr1-89302-60298a58.mongo.ondigitalocean.com/whatsapp-dashboard?tls=true&authSource=admin&replicaSet=db-mongodb-blr1-89302")
+    MONGO_URI = os.getenv("MONGO_URI")
+    if not MONGO_URI:
+        print(f"{Fore.RED}❌ MONGO_URI not found in environment variables.{Style.RESET_ALL}")
+        return
     
     try:
         client = AsyncIOMotorClient(
