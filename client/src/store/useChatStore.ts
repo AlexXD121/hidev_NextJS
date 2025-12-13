@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { ChatSession, Message } from '@/types';
-import { MOCK_CHATS, MOCK_MSG_HISTORY } from '@/lib/mockData';
+import { ChatSession, Message, Contact } from '@/types';
+import { realApi } from '@/lib/api/real-api';
 
 interface ChatState {
     selectedChatId: string | null;
@@ -15,48 +15,20 @@ interface ChatState {
     selectChat: (chatId: string) => void;
     fetchChats: () => Promise<void>;
     fetchMessages: (chatId: string) => Promise<void>;
-    sendMessage: (chatId: string, text: string, type?: 'text' | 'image' | 'document' | 'template', mediaUrl?: string) => void;
+    sendMessage: (chatId: string, text: string, type?: 'text' | 'image' | 'document' | 'template', mediaUrl?: string) => Promise<void>;
+    startChat: (contact: Contact) => void;
+    pollMessages: () => void;
     receiveMessage: (chatId: string, message: Message) => void;
     setTyping: (chatId: string, isTyping: boolean) => void;
     setSearchQuery: (query: string) => void;
 }
 
-// Auto-response generator
-const getAutoResponse = (userMessage: string): string => {
-    const responses = [
-        "Thanks for the update!",
-        "Can you send more details?",
-        "I'll get back to you shortly.",
-        "That sounds great!",
-        "Let me check on that for you.",
-        "Perfect, I understand.",
-        "Could you clarify that?",
-        "I appreciate your patience."
-    ];
-    
-    // Simple keyword-based responses
-    const lowerMessage = userMessage.toLowerCase();
-    
-    if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-        return "Hello! How can I help you today?";
-    }
-    if (lowerMessage.includes('thank')) {
-        return "You're welcome!";
-    }
-    if (lowerMessage.includes('price') || lowerMessage.includes('cost')) {
-        return "Let me get you the pricing information.";
-    }
-    
-    // Random response for other messages
-    return responses[Math.floor(Math.random() * responses.length)];
-};
-
 export const useChatStore = create<ChatState>()(
     persist(
         (set, get) => ({
             selectedChatId: null,
-            chats: MOCK_CHATS,
-            messages: MOCK_MSG_HISTORY,
+            chats: [],
+            messages: {},
             isLoading: false,
             searchQuery: '',
             typingIndicators: {},
@@ -64,7 +36,7 @@ export const useChatStore = create<ChatState>()(
             selectChat: (chatId) => {
                 set({ selectedChatId: chatId });
                 get().fetchMessages(chatId);
-                // Mark as read immediately when selected
+                // Mark as read locally
                 set(state => ({
                     chats: state.chats.map(c =>
                         c.id === chatId ? { ...c, unreadCount: 0 } : c
@@ -73,30 +45,39 @@ export const useChatStore = create<ChatState>()(
             },
 
             fetchChats: async () => {
-                set({ isLoading: true });
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 500));
-                set({ isLoading: false });
+                // Determine if we should show loading spinner (only on first empty load)
+                if (get().chats.length === 0) {
+                    set({ isLoading: true });
+                }
+
+                try {
+                    const chats = await realApi.chat.getChats();
+                    set({ chats, isLoading: false });
+                } catch (error) {
+                    console.error('Failed to fetch chats:', error);
+                    set({ isLoading: false });
+                }
             },
 
             fetchMessages: async (chatId) => {
-                // If already loaded for this chat, don't re-fetch
-                if (get().messages[chatId]) return;
-
-                // Simulate loading messages
-                await new Promise(resolve => setTimeout(resolve, 300));
-                set(state => ({
-                    messages: {
-                        ...state.messages,
-                        [chatId]: []
-                    }
-                }));
+                try {
+                    const messages = await realApi.chat.getMessages(chatId);
+                    set(state => ({
+                        messages: {
+                            ...state.messages,
+                            [chatId]: messages
+                        }
+                    }));
+                } catch (error) {
+                    console.error('Failed to fetch messages:', error);
+                }
             },
 
-            sendMessage: (chatId, text, type = 'text', mediaUrl) => {
-                // Add user message immediately
+            sendMessage: async (chatId, text, type = 'text', mediaUrl) => {
+                // Optimistic update
+                const tempId = `temp-${Date.now()}`;
                 const newMessage: Message = {
-                    id: `msg-${Date.now()}`,
+                    id: tempId,
                     chatId,
                     senderId: 'me',
                     text,
@@ -116,25 +97,72 @@ export const useChatStore = create<ChatState>()(
                     )
                 }));
 
-                // Simulate auto-response
-                setTimeout(() => {
-                    get().setTyping(chatId, true);
-                    
-                    setTimeout(() => {
-                        get().setTyping(chatId, false);
-                        get().receiveMessage(chatId, {
-                            id: `msg-${Date.now()}`,
-                            chatId,
-                            senderId: chatId.replace('chat', 'c'), // Convert chatId to contactId
-                            text: getAutoResponse(text),
-                            timestamp: new Date().toISOString(),
-                            status: 'delivered',
-                            type: 'text'
-                        });
-                    }, Math.random() * 2000 + 1000); // 1-3 seconds typing
-                }, Math.random() * 2000 + 2000); // 2-4 seconds delay
+                try {
+                    const sentMessage = await realApi.chat.sendMessage(chatId, text, type, mediaUrl);
+
+                    // Replace optimistic message with real one
+                    set(state => ({
+                        messages: {
+                            ...state.messages,
+                            [chatId]: state.messages[chatId].map(m => m.id === tempId ? sentMessage : m)
+                        },
+                        chats: state.chats.map(c =>
+                            c.id === chatId ? { ...c, lastMessage: sentMessage } : c
+                        )
+                    }));
+                } catch (error) {
+                    console.error('Failed to send message:', error);
+                    // Mark as failed in UI (simplified here by not removing it yet, just log)
+                }
             },
 
+            startChat: (contact: Contact) => {
+                const state = get();
+                // Check if we already have a chat with this contact
+                // Assumption: chat.contact.id or chat.id relates to contact in a known way. 
+                // Usually chat.contact.id would match contact.id.
+                const existingChat = state.chats.find(c => c.contact.id === contact.id);
+
+                if (existingChat) {
+                    get().selectChat(existingChat.id);
+                } else {
+                    // Optimistically create a new chat session
+                    // In a real app, you might POST /chats first. 
+                    // Here we'll mock the ID format or assume backend handles it on first message.
+                    // For UI flow, we need a valid-looking chat object.
+                    // Let's assume the chat ID is "chat-{contactId}" or similar if we control it,
+                    // or generate a temp one.
+                    const newChatId = `chat-${contact.id}`;
+
+                    const newChat: ChatSession = {
+                        id: newChatId,
+                        contactId: contact.id, // Add missing property
+                        contact: contact,
+                        unreadCount: 0,
+                        lastMessage: undefined, // No message yet
+                        status: 'active'
+                    };
+
+                    set(state => ({
+                        chats: [newChat, ...state.chats],
+                        selectedChatId: newChatId
+                    }));
+
+                    // IMPORTANT: If backend requires explicit chat creation, do it here.
+                    // For now, we assume implicit creation on first message or this local state is enough until refresh.
+                }
+            },
+
+            pollMessages: () => {
+                // Simple polling mechanism
+                get().fetchChats();
+                const selectedId = get().selectedChatId;
+                if (selectedId) {
+                    get().fetchMessages(selectedId);
+                }
+            },
+
+            // Keeping receiveMessage and setTyping for WebSocket or local simulation if needed
             receiveMessage: (chatId, message) => {
                 set(state => {
                     const chatMessages = state.messages[chatId] || [];
