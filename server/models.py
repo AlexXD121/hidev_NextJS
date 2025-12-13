@@ -113,3 +113,20 @@ class RegisterRequest(BaseSchema):
     name: str
     email: str
     password: str
+
+class Template(Document):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), alias="_id")
+    name: str
+    content: str
+    language: str = "en"
+    status: str = "approved" # approved, pending, rejected
+    category: str = "marketing"
+
+    class Settings:
+        name = "templates"
+    
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True
+    )
+

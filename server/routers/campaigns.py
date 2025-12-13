@@ -12,3 +12,21 @@ async def get_campaigns():
 async def create_campaign(campaign: Campaign):
     await campaign.insert()
     return campaign
+
+@router.get("/campaign_contacts", response_model=List[dict])
+async def get_campaign_contacts(campaign_id: str):
+    # Mock return
+    return [
+        {"name": "John Doe", "phone": "+123456789"},
+        {"name": "Jane Smith", "phone": "+987654321"}
+    ]
+
+@router.get("/{campaign_name}")
+async def get_campaign_stats(campaign_name: str):
+    # Mock stats
+    return {
+        "sent": 120,
+        "delivered": 115,
+        "read": 85,
+        "failed": 5
+    }

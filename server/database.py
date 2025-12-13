@@ -1,6 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
-from models import User, Contact, Campaign, Message
+from models import User, Contact, Campaign, Message, Template
 import os
 from dotenv import load_dotenv
 import certifi # Kept for safety, but unused in the connection below

@@ -61,3 +61,32 @@ async def send_message(chat_id: str, message: Message, background_tasks: Backgro
         background_tasks.add_task(simulate_reply, chat_id)
         
     return message
+
+class SendMessageRequest(BaseModel):
+    chat_id: str
+    text: str
+
+from pydantic import BaseModel
+
+@router.post("/send")
+async def send_message_alias(payload: SendMessageRequest, background_tasks: BackgroundTasks):
+    """
+    Alias endpoint for external or simple sending.
+    """
+    # Create a message object compatible with our system
+    from models import Message
+    msg = Message(
+        chat_id=payload.chat_id,
+        sender_id="me",
+        text=payload.text,
+        status="sent",
+        type="text",
+        contact_id=payload.chat_id
+    )
+    
+    await msg.insert()
+    
+    # Trigger background reply
+    background_tasks.add_task(simulate_reply, payload.chat_id)
+    
+    return {"status": "Message Queued", "message_id": str(msg.id)}
