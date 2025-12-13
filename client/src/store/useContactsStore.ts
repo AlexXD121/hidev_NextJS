@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Contact } from '@/types';
-import { MOCK_CONTACTS } from '@/lib/mockData';
+import { realApi } from '@/lib/api/real-api';
 
 interface ContactsState {
     contacts: Contact[];
@@ -11,9 +11,9 @@ interface ContactsState {
 
     // Actions
     fetchContacts: () => Promise<void>;
-    addContact: (contact: Omit<Contact, 'id'>) => void;
-    updateContact: (id: string, updates: Partial<Contact>) => void;
-    deleteContact: (id: string) => void;
+    addContact: (contact: Omit<Contact, 'id'>) => Promise<void>;
+    updateContact: (id: string, updates: Partial<Contact>) => Promise<void>;
+    deleteContact: (id: string) => Promise<void>;
     setFilterQuery: (query: string) => void;
     setFilterTags: (tags: string[]) => void;
 }
@@ -21,44 +21,58 @@ interface ContactsState {
 export const useContactsStore = create<ContactsState>()(
     persist(
         (set, get) => ({
-            contacts: MOCK_CONTACTS,
+            contacts: [],
             isLoading: false,
             filterQuery: '',
             filterTags: [],
 
             fetchContacts: async () => {
                 set({ isLoading: true });
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 500));
-                set({ isLoading: false });
+                try {
+                    const contacts = await realApi.contacts.getContacts();
+                    set({ contacts, isLoading: false });
+                } catch (error) {
+                    console.error('Failed to fetch contacts:', error);
+                    set({ isLoading: false });
+                }
             },
 
-            addContact: (contactData) => {
-                const newContact: Contact = {
-                    ...contactData,
-                    id: `contact-${Date.now()}`,
-                    lastActive: new Date().toISOString(),
-                };
-                
-                set(state => ({
-                    contacts: [...state.contacts, newContact]
-                }));
+            addContact: async (contactData) => {
+                try {
+                    const newContact = await realApi.contacts.createContact(contactData);
+                    set(state => ({
+                        contacts: [...state.contacts, newContact]
+                    }));
+                } catch (error) {
+                    console.error('Failed to add contact:', error);
+                    // Optionally handle error state
+                }
             },
 
-            updateContact: (id, updates) => {
-                set(state => ({
-                    contacts: state.contacts.map(contact =>
-                        contact.id === id 
-                            ? { ...contact, ...updates }
-                            : contact
-                    )
-                }));
+            updateContact: async (id, updates) => {
+                try {
+                    const updatedContact = await realApi.contacts.updateContact(id, updates);
+                    set(state => ({
+                        contacts: state.contacts.map(contact =>
+                            contact.id === id
+                                ? { ...contact, ...updatedContact }
+                                : contact
+                        )
+                    }));
+                } catch (error) {
+                    console.error('Failed to update contact:', error);
+                }
             },
 
-            deleteContact: (id) => {
-                set(state => ({
-                    contacts: state.contacts.filter(contact => contact.id !== id)
-                }));
+            deleteContact: async (id) => {
+                try {
+                    await realApi.contacts.deleteContact(id);
+                    set(state => ({
+                        contacts: state.contacts.filter(contact => contact.id !== id)
+                    }));
+                } catch (error) {
+                    console.error('Failed to delete contact:', error);
+                }
             },
 
             setFilterQuery: (query) => set({ filterQuery: query }),

@@ -45,21 +45,21 @@ export function RecentActivity({ activities }: RecentActivityProps) {
                     {activities.length === 0 ? (
                         <p className="text-sm text-muted-foreground">No recent activity.</p>
                     ) : (
-                        activities.map((item) => (
-                            <div key={item.id} className="flex items-center">
+                        activities.map((activity, index) => (
+                            <div key={`${activity.id}-${index}`} className="flex items-center">
                                 <Avatar className="h-9 w-9">
-                                    <AvatarImage src={item.user?.avatar} alt={item.user?.name} />
-                                    <AvatarFallback>{item.user?.initials || "SYS"}</AvatarFallback>
+                                    <AvatarImage src={activity.user?.avatar} alt={activity.user?.name} />
+                                    <AvatarFallback>{activity.user?.initials || "SYS"}</AvatarFallback>
                                 </Avatar>
                                 <div className="ml-4 space-y-1">
-                                    <p className="text-sm font-medium leading-none">{item.title}</p>
+                                    <p className="text-sm font-medium leading-none">{activity.title}</p>
                                     <p className="text-sm text-muted-foreground">
-                                        {item.description}
+                                        {activity.description}
                                     </p>
                                 </div>
                                 <div className="ml-auto font-medium text-xs text-muted-foreground flex items-center gap-1">
-                                    {getIcon(item.type)}
-                                    {item.timestamp}
+                                    {getIcon(activity.type)}
+                                    {activity.timestamp}
                                 </div>
                             </div>
                         ))

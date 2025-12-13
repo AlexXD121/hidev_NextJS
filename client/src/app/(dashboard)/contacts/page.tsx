@@ -26,7 +26,7 @@ export default function ContactsPage() {
                 {isLoading && contacts.length === 0 ? (
                     <div className="text-center py-10">Loading contacts...</div>
                 ) : (
-                    <ContactsTable data={contacts} />
+                    <ContactsTable data={contacts} isLoading={isLoading} />
                 )}
             </div>
         </ScrollArea>
