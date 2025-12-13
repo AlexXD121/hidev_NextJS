@@ -3,6 +3,7 @@ from typing import List
 from pydantic import BaseModel
 from models import Message, ChatSession, Contact
 import asyncio
+from datetime import datetime
 
 router = APIRouter(tags=["chat"])
 
@@ -14,22 +15,22 @@ async def get_chats():
     
     for contact in contacts:
         # 2. Get last message
-        last_msg = await Message.find(Message.chat_id == contact.id).sort(-Message.timestamp).first_or_none()
+        last_msg = await Message.find(Message.chat_id == str(contact.id)).sort(-Message.timestamp).first_or_none()
         
         unread = 0
         if last_msg and last_msg.sender_id == contact.id:
             unread = 1
             
         sessions.append(ChatSession(
-            id=contact.id,
-            contact_id=contact.id,
+            id=str(contact.id),
+            contact_id=str(contact.id),
             contact=contact,
             last_message=last_msg,
             unread_count=unread,
             status="active"
         ))
         
-    sessions.sort(key=lambda x: x.last_message.timestamp if x.last_message else "", reverse=True)
+    sessions.sort(key=lambda x: x.last_message.timestamp if x.last_message else datetime.min, reverse=True)
     return sessions
 
 @router.get("/chats/{chat_id}/messages", response_model=List[Message])

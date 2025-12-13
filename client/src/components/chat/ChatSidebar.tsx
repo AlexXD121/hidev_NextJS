@@ -8,11 +8,23 @@ import { useChatStore } from "@/store/useChatStore"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { NewChatDialog } from "@/components/chat/NewChatDialog"
 
 export function ChatSidebar() {
-    const { chats, selectedChatId, selectChat } = useChatStore()
+    const { chats, selectedChatId, selectChat, fetchChats, pollMessages } = useChatStore()
     const [searchQuery, setSearchQuery] = useState("")
+
+    // Initial fetch and polling setup
+    useEffect(() => {
+        fetchChats();
+
+        const interval = setInterval(() => {
+            pollMessages();
+        }, 5000); // Poll every 5 seconds
+
+        return () => clearInterval(interval);
+    }, [fetchChats, pollMessages]);
 
     const filteredChats = chats.filter(chat =>
         chat.contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -32,9 +44,13 @@ export function ChatSidebar() {
                     <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
                         <CircleDashed className="h-5 w-5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
-                        <MessageSquarePlus className="h-5 w-5" />
-                    </Button>
+
+                    <NewChatDialog>
+                        <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
+                            <MessageSquarePlus className="h-5 w-5" />
+                        </Button>
+                    </NewChatDialog>
+
                     <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
                         <MoreVertical className="h-5 w-5" />
                     </Button>
@@ -71,10 +87,16 @@ export function ChatSidebar() {
                                 selectedChatId === chat.id && "bg-[#f0f2f5] dark:bg-[#202C33]"
                             )}
                         >
-                            <Avatar className="h-12 w-12 shrink-0">
-                                <AvatarImage src={chat.contact.avatar} />
-                                <AvatarFallback>{chat.contact.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                            </Avatar>
+                            <div className="relative">
+                                <Avatar className="h-12 w-12 shrink-0">
+                                    <AvatarImage src={chat.contact.avatar} />
+                                    <AvatarFallback>{chat.contact.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                                {chat.status === 'active' && (
+                                    <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-background ring-1 ring-background" />
+                                )}
+                            </div>
+
                             <div className="flex-1 overflow-hidden min-w-0">
                                 <div className="flex items-center justify-between mb-0.5">
                                     <span className="font-normal text-[17px] text-[#111B21] dark:text-[#E9EDEF] truncate">
@@ -91,7 +113,7 @@ export function ChatSidebar() {
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="text-sm text-[#667781] dark:text-[#8696A0] truncate pr-2">
-                                        {chat.lastMessage?.text || "No messages yet"}
+                                        {chat.lastMessage?.text || "Click to start chatting"}
                                     </div>
                                     {chat.unreadCount > 0 && (
                                         <span className="bg-[#25D366] text-white text-[11px] font-bold h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center shrink-0">

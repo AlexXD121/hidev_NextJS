@@ -13,6 +13,7 @@ import dynamic from 'next/dynamic'
 import { ActivityItem } from "@/components/dashboard/RecentActivity";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 const AnalyticsChart = dynamic(() => import('@/components/dashboard/AnalyticsChart').then(mod => mod.AnalyticsChart), {
   loading: () => <Skeleton className="h-[430px] w-full rounded-xl" />,
@@ -23,6 +24,21 @@ const RecentActivity = dynamic(() => import('@/components/dashboard/RecentActivi
   loading: () => <Skeleton className="h-[430px] w-full rounded-xl" />,
   ssr: false
 })
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
 
 export default function DashboardPage() {
   const { chats, messages } = useChatStore()
@@ -53,17 +69,17 @@ export default function DashboardPage() {
     const messageActivities: ActivityItem[] = chats
       .filter(c => c.lastMessage)
       .map(c => ({
-        id: c.lastMessage.id,
+        id: c.lastMessage!.id,
         type: "message",
         title: `Message from ${c.contact.name}`,
-        description: c.lastMessage.text.substring(0, 50) + (c.lastMessage.text.length > 50 ? "..." : ""),
-        timestamp: new Date(c.lastMessage.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        description: c.lastMessage!.text.substring(0, 50) + (c.lastMessage!.text.length > 50 ? "..." : ""),
+        timestamp: new Date(c.lastMessage!.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         user: {
           name: c.contact.name,
           avatar: c.contact.avatar,
           initials: c.contact.name.substring(0, 2).toUpperCase()
         },
-        rawDate: new Date(c.lastMessage.timestamp) // temporary for sorting
+        rawDate: new Date(c.lastMessage!.timestamp) // temporary for sorting
       } as any))
 
     // 2. Campaign Activities
@@ -119,14 +135,22 @@ export default function DashboardPage() {
   })
 
   return (
-    <div className="space-y-6 p-8">
-      <div>
+    <motion.div
+      className="space-y-6 p-8"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div variants={itemVariants}>
         <h1 className="text-2xl font-bold tracking-tight">Dashboard Overview</h1>
         <p className="text-muted-foreground">Welcome back. Here's what's happening today.</p>
-      </div>
+      </motion.div>
 
       {/* Stats Cards Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <motion.div
+        className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+        variants={itemVariants}
+      >
         <>
           <StatsCard
             title="Total Contacts"
@@ -157,21 +181,24 @@ export default function DashboardPage() {
             trendUp={true}
           />
         </>
-      </div>
+      </motion.div>
 
       {/* Quick Actions */}
-      <div>
+      <motion.div variants={itemVariants}>
         <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
         <div className="flex flex-wrap gap-3">
-          <QuickActionButton href="/campaigns" icon={Megaphone} label="New Campaign" color="text-purple-500" />
-          <QuickActionButton href="/contacts" icon={Users} label="Add Contact" color="text-emerald-500" />
-          <QuickActionButton href="/chat" icon={MessageSquare} label="Start Chat" color="text-blue-500" />
-          <QuickActionButton href="/templates" icon={MousePointerClick} label="Create Template" color="text-orange-500" />
+          <QuickActionButton href="/campaigns" icon={Megaphone} label="New Campaign" color="text-purple-500" shadowColor="shadow-purple-500/20" />
+          <QuickActionButton href="/contacts" icon={Users} label="Add Contact" color="text-emerald-500" shadowColor="shadow-emerald-500/20" />
+          <QuickActionButton href="/chat" icon={MessageSquare} label="Start Chat" color="text-blue-500" shadowColor="shadow-blue-500/20" />
+          <QuickActionButton href="/templates" icon={MousePointerClick} label="Create Template" color="text-orange-500" shadowColor="shadow-orange-500/20" />
         </div>
-      </div>
+      </motion.div>
 
       {/* Charts and Activity Grid */}
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-7">
+      <motion.div
+        className="grid gap-4 grid-cols-1 md:grid-cols-7"
+        variants={itemVariants}
+      >
         <div className="col-span-4">
           <AnalyticsChart data={chartData || []} />
         </div>
@@ -180,22 +207,24 @@ export default function DashboardPage() {
           {/* Pass dynamic activities if available, else standard loading or empty state handled by component */}
           <RecentActivity activities={dynamicActivities} />
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
-function QuickActionButton({ href, icon: Icon, label, color }: { href: string, icon: any, label: string, color: string }) {
+function QuickActionButton({ href, icon: Icon, label, color, shadowColor }: { href: string, icon: any, label: string, color: string, shadowColor: string }) {
   const router = useRouter()
   return (
-    <button
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
       onClick={() => router.push(href)}
-      className="flex items-center gap-3 bg-card border px-4 py-3 rounded-xl shadow-sm hover:shadow-md transition-all hover:border-primary/50 group"
+      className={`flex items-center gap-3 bg-card border px-4 py-3 rounded-xl shadow-sm transition-all hover:border-primary/50 group hover:shadow-lg ${shadowColor}`}
     >
       <div className={`p-2 rounded-lg bg-secondary group-hover:bg-background transition-colors ${color}`}>
         <Icon className="h-5 w-5" />
       </div>
       <span className="font-medium text-sm text-foreground">{label}</span>
-    </button>
+    </motion.button>
   )
 }

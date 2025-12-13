@@ -31,7 +31,7 @@ export interface ChatSession {
     id: string;
     contactId: string;
     contact: Contact;
-    lastMessage: Message;
+    lastMessage?: Message;
     unreadCount: number;
     status: "active" | "archived";
 }
