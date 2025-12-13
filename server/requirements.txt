@@ -9,3 +9,6 @@ pyjwt
 dnspython
 pymongo[srv]
 python-dotenv
+certifi
+passlib[bcrypt]
+pyjwt

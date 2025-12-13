@@ -1,10 +1,11 @@
 import { ApiAdapter } from "./api";
 import { MockApiService } from "./mock-api";
+import { realApi } from "./real-api";
 
-// In the future, we can switch this based on environment variables
+// Switch between Real and Mock API
+const useRealApi = true;
 // const useRealApi = process.env.NEXT_PUBLIC_USE_REAL_API === 'true';
-const useRealApi = false;
 
 export const api: ApiAdapter = useRealApi
-    ? new MockApiService() // Placeholder for RealApiService
+    ? realApi
     : new MockApiService();

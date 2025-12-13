@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { useAuthStore } from '@/store/useAuthStore';
 
-const BASE_URL = 'http://localhost:8000/api';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export const apiClient = axios.create({
     baseURL: BASE_URL,
@@ -11,19 +12,9 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
     (config) => {
-        // We'll read the token from localStorage via Zustand's persistence
-        // The persistence key is 'auth-storage', so we parse it manually or rely on `useAuthStore.getState().token` if outside standard hook usage.
-        // For simplicity, we can try to read from `localStorage` directly as Zustand persists it there.
-        const storage = localStorage.getItem('auth-storage');
-        if (storage) {
-            try {
-                const { state } = JSON.parse(storage);
-                if (state && state.token) {
-                    config.headers.Authorization = `Bearer ${state.token}`;
-                }
-            } catch (e) {
-                console.error("Failed to parse auth storage", e);
-            }
+        const token = useAuthStore.getState().token;
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
     },
@@ -35,7 +26,11 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Optional: Handle 401 Unauthorized globally
+        if (error.response && error.response.status === 401) {
+            // Un-authorized - log out user
+            useAuthStore.getState().logout();
+            // Optionally redirect if needed, but the AuthGuard should handle it once isAuthenticated becomes false
+        }
         return Promise.reject(error);
     }
 );

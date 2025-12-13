@@ -51,25 +51,17 @@ export const useAuthStore = create<AuthStore>()(
             register: async (name: string, email: string, password: string) => {
                 set({ isLoading: true, error: null })
                 try {
-                    // Simulate network delay
-                    await new Promise(resolve => setTimeout(resolve, 1500))
-
-                    const fakeToken = `fake-jwt-token-${Date.now()}`
-                    const fakeUser: User = {
-                        id: Math.random().toString(36).substring(7),
-                        name: name,
-                        email: email,
-                        avatar: 'https://github.com/shadcn.png',
-                        role: 'admin'
-                    }
+                    // Call Real API
+                    const { user, token } = await api.auth.register(name, email, password);
 
                     set({
-                        user: fakeUser,
-                        token: fakeToken,
+                        user,
+                        token,
                         isAuthenticated: true,
                         isLoading: false
                     })
                 } catch (error) {
+                    console.error("Registration error:", error);
                     set({ error: 'Registration failed', isLoading: false })
                     throw error
                 }

@@ -10,6 +10,7 @@ import { DashboardStats, ChartData, ActivityItem } from "../api-service";
 
 export interface AuthApi {
     login(email: string, password?: string): Promise<{ user: User; token: string }>;
+    register(name: string, email: string, password?: string): Promise<{ user: User; token: string }>;
     logout(): Promise<void>;
     getCurrentUser(): Promise<User | null>;
 }
