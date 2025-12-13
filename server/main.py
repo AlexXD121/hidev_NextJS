@@ -29,6 +29,9 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(contacts.router, prefix="/api")
 app.include_router(campaigns.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
+# app.include_router(users.router, prefix="/api") # Need to import it first
+from routers import auth, contacts, campaigns, chat, users
+app.include_router(users.router, prefix="/api")
 
 @app.get("/")
 def read_root():

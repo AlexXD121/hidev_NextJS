@@ -53,8 +53,14 @@ export interface DashboardApi {
     getRecentActivity(): Promise<ActivityItem[]>;
 }
 
+export interface UsersApi {
+    getProfile(): Promise<User>;
+    updateProfile(data: { name: string; email: string }): Promise<User>;
+}
+
 export interface ApiAdapter {
     auth: AuthApi;
+    users: UsersApi;
     contacts: ContactsApi;
     chat: ChatApi;
     campaigns: CampaignsApi;

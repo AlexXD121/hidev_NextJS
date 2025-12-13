@@ -18,6 +18,7 @@ interface AuthStore {
     error: string | null
     login: (email: string, password: string) => Promise<void>
     register: (name: string, email: string, password: string) => Promise<void>
+    updateUser: (user: User) => void
     logout: () => void
     checkAuth: () => boolean
 }
@@ -65,6 +66,10 @@ export const useAuthStore = create<AuthStore>()(
                     set({ error: 'Registration failed', isLoading: false })
                     throw error
                 }
+            },
+
+            updateUser: (user: User) => {
+                set({ user })
             },
 
             logout: () => {

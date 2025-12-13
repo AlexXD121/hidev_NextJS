@@ -1,6 +1,7 @@
 import {
     ApiAdapter,
     AuthApi,
+    UsersApi,
     ContactsApi,
     ChatApi,
     CampaignsApi,
@@ -131,8 +132,21 @@ const dashboard: DashboardApi = {
     getRecentActivity: async () => []
 }
 
+// --- Users ---
+const users: UsersApi = {
+    getProfile: async () => {
+        const response = await apiClient.get('/users/me');
+        return response.data;
+    },
+    updateProfile: async (data: { name: string; email: string }) => {
+        const response = await apiClient.put('/users/me', data);
+        return response.data;
+    }
+};
+
 export const realApi: ApiAdapter = {
     auth,
+    users,
     contacts,
     chat,
     campaigns,

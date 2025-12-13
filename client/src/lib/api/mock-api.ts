@@ -1,4 +1,4 @@
-import { ApiAdapter, AuthApi, ContactsApi, ChatApi, CampaignsApi, TemplatesApi, DashboardApi } from "./api";
+import { ApiAdapter, AuthApi, UsersApi, ContactsApi, ChatApi, CampaignsApi, TemplatesApi, DashboardApi } from "./api";
 import {
     MOCK_CONTACTS,
     MOCK_CHATS,
@@ -20,6 +20,14 @@ class MockAuthApi implements AuthApi {
         if (!email) throw new Error("Email required");
         return {
             user: CURRENT_USER,
+            token: "mock-jwt-token-" + Date.now()
+        };
+    }
+
+    async register(name: string, email: string, password?: string): Promise<{ user: User; token: string }> {
+        await delay();
+        return {
+            user: { ...CURRENT_USER, name, email },
             token: "mock-jwt-token-" + Date.now()
         };
     }
@@ -254,8 +262,20 @@ class MockDashboardApi implements DashboardApi {
     }
 }
 
+class MockUsersApi implements UsersApi {
+    async getProfile(): Promise<User> {
+        await delay();
+        return CURRENT_USER;
+    }
+    async updateProfile(data: { name: string; email: string }): Promise<User> {
+        await delay();
+        return { ...CURRENT_USER, ...data };
+    }
+}
+
 export class MockApiService implements ApiAdapter {
     auth = new MockAuthApi();
+    users = new MockUsersApi();
     contacts = new MockContactsApi();
     chat = new MockChatApi();
     campaigns = new MockCampaignsApi();
