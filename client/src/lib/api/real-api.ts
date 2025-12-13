@@ -105,17 +105,33 @@ const campaigns: CampaignsApi = {
         const response = await apiClient.post('/campaigns/', campaign);
         return response.data;
     },
-    updateCampaign: async (id, updates) => ({ id, ...updates } as Campaign),
+    // Using the stats endpoint which currently returns mock data from backend
+    // Route is /campaigns/{id_or_name} in python
+    updateCampaign: async (id, updates) => {
+        // Not fully implemented in backend yet, assuming PUT or similar
+        return { id, ...updates } as Campaign;
+    },
     deleteCampaign: async (id) => { },
     duplicateCampaign: async (id) => ({} as Campaign)
 };
 
-// --- Templates (Mock) ---
+// --- Templates ---
 const templates: TemplatesApi = {
-    getTemplates: async () => [],
-    createTemplate: async (t) => t as Template,
-    updateTemplate: async (id, t) => ({ id, ...t } as Template),
-    deleteTemplate: async () => { }
+    getTemplates: async () => {
+        const response = await apiClient.get('/templates/');
+        return response.data;
+    },
+    createTemplate: async (t) => {
+        const response = await apiClient.post('/templates/', t);
+        return response.data;
+    },
+    updateTemplate: async (id, t) => {
+        // Backend doesn't support update yet
+        return { id, ...t } as Template
+    },
+    deleteTemplate: async (id) => {
+        await apiClient.delete(`/templates/${id}`);
+    }
 }
 
 // --- Dashboard (Mock) ---

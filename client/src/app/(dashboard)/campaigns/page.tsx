@@ -1,5 +1,7 @@
 "use client"
 
+import { useEffect } from "react"
+
 import { useCampaignStore } from "@/store/useCampaignStore"
 import { Button } from "@/components/ui/button"
 import { Plus, Copy } from "lucide-react"
@@ -13,7 +15,11 @@ import { toast } from "sonner"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 export default function CampaignsPage() {
-    const { campaigns, startSimulation, duplicateCampaign } = useCampaignStore()
+    const { campaigns, startSimulation, duplicateCampaign, fetchCampaigns } = useCampaignStore()
+
+    useEffect(() => {
+        fetchCampaigns()
+    }, [fetchCampaigns])
 
     const handleDuplicate = (id: string) => {
         duplicateCampaign(id)

@@ -78,9 +78,9 @@ export function ChatSidebar() {
             {/* Chat List */}
             <ScrollArea className="flex-1 bg-background">
                 <div className="flex flex-col">
-                    {filteredChats.map((chat) => (
+                    {filteredChats.map((chat, index) => (
                         <button
-                            key={chat.id}
+                            key={`${chat.id}-${index}`}
                             onClick={() => selectChat(chat.id)}
                             className={cn(
                                 "flex items-center gap-3 px-3 py-3 w-full text-left transition-colors border-b border-[#f0f2f5] dark:border-[#2A3942] hover:bg-[#f0f2f5] dark:hover:bg-[#202C33]",

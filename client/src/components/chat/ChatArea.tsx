@@ -121,8 +121,8 @@ export function ChatArea() {
             <div className="flex-1 overflow-hidden relative bg-chat">
                 <ScrollArea className="h-full px-8 md:px-[5%]" type="always">
                     <div className="flex flex-col justify-end min-h-full py-4 pb-2">
-                        {currentMessages.map((msg) => (
-                            <MessageBubble key={msg.id} message={msg} isMe={msg.senderId === 'me'} />
+                        {currentMessages.map((msg, index) => (
+                            <MessageBubble key={`${msg.id}-${index}`} message={msg} isMe={msg.senderId === 'me'} />
                         ))}
                         <div ref={scrollRef} />
                     </div>
