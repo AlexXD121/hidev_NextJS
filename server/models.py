@@ -116,7 +116,7 @@ class CampaignStats(BaseModel):
     sent: int = 0
     delivered: int = 0
     read: int = 0
-    failed: int = 0
+    total: int = 0
 
 class Campaign(Document):
     id: Optional[PydanticObjectId] = Field(default=None, alias="_id")

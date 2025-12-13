@@ -43,15 +43,17 @@ import { Badge } from "@/components/ui/badge"
 import { Contact } from "@/types"
 import { useContactsStore } from "@/store/useContactsStore"
 import { toast } from "sonner"
+import { Skeleton } from "@/components/ui/skeleton"
 
 import { ContactDetailsSheet } from "./ContactDetailsSheet"
 import { AddContactForm } from "./AddContactForm"
 
 interface ContactsTableProps {
     data: Contact[]
+    isLoading?: boolean
 }
 
-export function ContactsTable({ data }: ContactsTableProps) {
+export function ContactsTable({ data, isLoading }: ContactsTableProps) {
     const { deleteContact } = useContactsStore()
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -305,7 +307,17 @@ export function ContactsTable({ data }: ContactsTableProps) {
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {isLoading ? (
+                            Array.from({ length: 5 }).map((_, index) => (
+                                <TableRow key={index}>
+                                    {columns.map((col, i) => (
+                                        <TableCell key={i}>
+                                            <Skeleton className="h-4 w-full" />
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
