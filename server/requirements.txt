@@ -10,8 +10,11 @@ dnspython
 pymongo[srv]
 python-dotenv
 certifi
-passlib[bcrypt]
-pyjwt
+
 bcrypt
 email-validator
 requests
+
+pandas
+gspread
+oauth2client

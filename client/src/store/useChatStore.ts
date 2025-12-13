@@ -21,6 +21,11 @@ interface ChatState {
     receiveMessage: (chatId: string, message: Message) => void;
     setTyping: (chatId: string, isTyping: boolean) => void;
     setSearchQuery: (query: string) => void;
+
+    // WebSocket
+    socket: WebSocket | null;
+    connectSocket: () => void;
+    disconnectSocket: () => void;
 }
 
 export const useChatStore = create<ChatState>()(
@@ -32,6 +37,7 @@ export const useChatStore = create<ChatState>()(
             isLoading: false,
             searchQuery: '',
             typingIndicators: {},
+            socket: null,
 
             selectChat: (chatId) => {
                 set({ selectedChatId: chatId });
@@ -45,11 +51,9 @@ export const useChatStore = create<ChatState>()(
             },
 
             fetchChats: async () => {
-                // Determine if we should show loading spinner (only on first empty load)
                 if (get().chats.length === 0) {
                     set({ isLoading: true });
                 }
-
                 try {
                     const chats = await realApi.chat.getChats();
                     set({ chats, isLoading: false });
@@ -100,7 +104,6 @@ export const useChatStore = create<ChatState>()(
                 try {
                     const sentMessage = await realApi.chat.sendMessage(chatId, text, type, mediaUrl);
 
-                    // Replace optimistic message with real one
                     set(state => ({
                         messages: {
                             ...state.messages,
@@ -112,34 +115,23 @@ export const useChatStore = create<ChatState>()(
                     }));
                 } catch (error) {
                     console.error('Failed to send message:', error);
-                    // Mark as failed in UI (simplified here by not removing it yet, just log)
                 }
             },
 
             startChat: (contact: Contact) => {
                 const state = get();
-                // Check if we already have a chat with this contact
-                // Assumption: chat.contact.id or chat.id relates to contact in a known way. 
-                // Usually chat.contact.id would match contact.id.
                 const existingChat = state.chats.find(c => c.contact.id === contact.id);
 
                 if (existingChat) {
                     get().selectChat(existingChat.id);
                 } else {
-                    // Optimistically create a new chat session
-                    // In a real app, you might POST /chats first. 
-                    // Here we'll mock the ID format or assume backend handles it on first message.
-                    // For UI flow, we need a valid-looking chat object.
-                    // Let's assume the chat ID is "chat-{contactId}" or similar if we control it,
-                    // or generate a temp one.
                     const newChatId = `chat-${contact.id}`;
-
                     const newChat: ChatSession = {
                         id: newChatId,
-                        contactId: contact.id, // Add missing property
+                        contactId: contact.id,
                         contact: contact,
                         unreadCount: 0,
-                        lastMessage: undefined, // No message yet
+                        lastMessage: undefined,
                         status: 'active'
                     };
 
@@ -147,24 +139,12 @@ export const useChatStore = create<ChatState>()(
                         chats: [newChat, ...state.chats],
                         selectedChatId: newChatId
                     }));
-
-                    // IMPORTANT: If backend requires explicit chat creation, do it here.
-                    // For now, we assume implicit creation on first message or this local state is enough until refresh.
                 }
             },
 
-            pollMessages: () => {
-                // Simple polling mechanism
-                get().fetchChats();
-                const selectedId = get().selectedChatId;
-                if (selectedId) {
-                    get().fetchMessages(selectedId);
-                }
-            },
-
-            // Keeping receiveMessage and setTyping for WebSocket or local simulation if needed
             receiveMessage: (chatId, message) => {
                 set(state => {
+                    // Avoid duplicates
                     const chatMessages = state.messages[chatId] || [];
                     if (chatMessages.some(m => m.id === message.id)) return state;
 
@@ -198,6 +178,57 @@ export const useChatStore = create<ChatState>()(
             },
 
             setSearchQuery: (query) => set({ searchQuery: query }),
+
+            // --- WebSocket Actions ---
+            pollMessages: () => {
+                console.warn("pollMessages is deprecated. Use WebSocket instead.");
+            },
+
+            connectSocket: () => {
+                const { socket } = get();
+                if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
+                    return; // Already connected
+                }
+
+                // URL logic: default to localhost:8000 if not specified (adjust for Vercel if needed)
+                const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://127.0.0.1:8000/api/ws/dashboard_client";
+
+                console.log("🔌 Connecting to WebSocket:", wsUrl);
+                const ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    console.log("✅ WebSocket Connected");
+                };
+
+                ws.onmessage = (event) => {
+                    try {
+                        const message: Message = JSON.parse(event.data);
+                        console.log("📩 WS Message:", message);
+                        get().receiveMessage(message.chatId, message);
+                    } catch (e) {
+                        console.error("Error parsing WS message:", e);
+                    }
+                };
+
+                ws.onclose = () => {
+                    console.log("❌ WebSocket Disconnected");
+                    set({ socket: null });
+                };
+
+                ws.onerror = (error) => {
+                    console.error("WebSocket Error:", error);
+                };
+
+                set({ socket: ws });
+            },
+
+            disconnectSocket: () => {
+                const { socket } = get();
+                if (socket) {
+                    socket.close();
+                    set({ socket: null });
+                }
+            }
         }),
         {
             name: 'chat-storage',
