@@ -14,7 +14,10 @@ apiClient.interceptors.request.use(
     (config) => {
         const token = useAuthStore.getState().token;
         if (token) {
+            console.log("[Axios] Attaching Token:", token.substring(0, 10) + "...");
             config.headers.Authorization = `Bearer ${token}`;
+        } else {
+            console.warn("[Axios] No token found in store!");
         }
         return config;
     },

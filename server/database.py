@@ -18,15 +18,15 @@ async def init_db():
 
     print(f"🔄 [2/3] Connecting to MongoDB Atlas (Workaround Mode)...")
 
+    APP_ENV = os.getenv("APP_ENV", "development")
+    # In 'production', we enforce strict SSL. In 'development', we allow invalid certs if needed.
+    tls_insecure = True if APP_ENV != "production" else False
+
     try:
-        # 🛡️ WINDOWS SSL WORKAROUND:
-        # 1. We DROP 'tlsCAFile' (parsing it was causing the crash).
-        # 2. We ADD 'tls=True' (Atlas requires encryption).
-        # 3. We ADD 'tlsAllowInvalidCertificates=True' (Skip the verification step).
         client = AsyncIOMotorClient(
             uri,
             tls=True,
-            tlsAllowInvalidCertificates=True,
+            tlsAllowInvalidCertificates=tls_insecure,
             serverSelectionTimeoutMS=5000
         )
         

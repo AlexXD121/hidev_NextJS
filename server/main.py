@@ -16,9 +16,12 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # Configure CORS
+import os
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -39,3 +42,5 @@ app.include_router(sheets.router, prefix="/api")
 @app.get("/")
 def read_root():
     return {"message": "WhatsApp Dashboard API is running"}
+
+# Trigger Reload

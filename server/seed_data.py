@@ -15,10 +15,6 @@ async def seed():
     try:
         client = AsyncIOMotorClient(
             MONGO_URI,
-    
-    try:
-        client = AsyncIOMotorClient(
-            MONGO_URI,
             tls=True,
             tlsAllowInvalidCertificates=True,
             serverSelectionTimeoutMS=5000

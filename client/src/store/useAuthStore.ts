@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { api } from '@/lib/api'
+import { useChatStore } from './useChatStore'
 
 interface User {
     id: string
@@ -73,6 +74,13 @@ export const useAuthStore = create<AuthStore>()(
             },
 
             logout: () => {
+                // Disconnect socket cleanly
+                try {
+                    useChatStore.getState().disconnectSocket()
+                } catch (e) {
+                    console.error("Socket disconnect error:", e)
+                }
+
                 set({
                     user: null,
                     token: null,
