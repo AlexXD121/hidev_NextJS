@@ -8,9 +8,9 @@ export function CampaignAnalytics() {
     const { campaigns } = useCampaignStore()
 
     // Aggregate data
-    const totalSent = campaigns.reduce((acc, curr) => acc + curr.sentCount, 0)
-    const totalDelivered = campaigns.reduce((acc, curr) => acc + curr.deliveredCount, 0)
-    const totalRead = campaigns.reduce((acc, curr) => acc + curr.readCount, 0)
+    const totalSent = campaigns.reduce((acc, curr) => acc + (curr.sentCount || 0), 0)
+    const totalDelivered = campaigns.reduce((acc, curr) => acc + (curr.deliveredCount || 0), 0)
+    const totalRead = campaigns.reduce((acc, curr) => acc + (curr.readCount || 0), 0)
 
     // Determine overall success rate (Read / Sent)
     const successRate = totalSent > 0 ? Math.round((totalRead / totalSent) * 100) : 0

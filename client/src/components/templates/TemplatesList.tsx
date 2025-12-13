@@ -100,8 +100,8 @@ export default function TemplatesList() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredTemplates.map((template) => (
-                        <Card key={template.id} className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-muted" onClick={() => handlePreview(template)}>
+                    {filteredTemplates.map((template, index) => (
+                        <Card key={template.id || index} className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-muted" onClick={() => handlePreview(template)}>
                             <CardHeader className="pb-3 space-y-0">
                                 <div className="flex justify-between items-start">
                                     <Badge variant="outline" className="mb-2">

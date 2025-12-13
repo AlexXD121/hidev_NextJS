@@ -55,9 +55,9 @@ export function TemplateSelector({ open, onOpenChange, onSelect }: TemplateSelec
                 </div>
                 <ScrollArea className="h-[300px] pr-4">
                     <div className="space-y-2">
-                        {filtered.map(template => (
+                        {filtered.map((template, index) => (
                             <div
-                                key={template.id}
+                                key={template.id || index}
                                 className="p-3 border rounded-md hover:bg-muted cursor-pointer transition-colors"
                                 onClick={() => {
                                     onSelect(template);

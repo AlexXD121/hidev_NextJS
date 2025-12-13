@@ -75,9 +75,12 @@ export const useCampaignStore = create<CampaignStore>()(
                 // We should probably call createCampaign API here too effectively
                 // But for now keeping local logic would desync
                 // Let's try to call createCampaign with duplicated data
+                // Destructure to safely remove ID and other system fields
+                const { id: _oldId, createdAt: _oldCreated, ...rest } = original;
+
                 const duplicatedPayload = {
-                    ...original,
-                    id: "", // Clear ID
+                    ...rest,
+                    // Do not include 'id' field at all, let backend generate it
                     name: `${original.name} (Copy)`,
                     status: 'draft',
                     createdAt: new Date().toISOString(),

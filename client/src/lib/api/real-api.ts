@@ -99,11 +99,25 @@ const chat: ChatApi = {
 const campaigns: CampaignsApi = {
     getCampaigns: async () => {
         const response = await apiClient.get('/campaigns/');
-        return response.data;
+        // Backend returns stats nested, frontend expects root.
+        return response.data.map((c: any) => ({
+            ...c,
+            sentCount: c.stats?.sent || 0,
+            deliveredCount: c.stats?.delivered || 0,
+            readCount: c.stats?.read || 0,
+            totalContacts: c.stats?.total || c.totalContacts || 0
+        }));
     },
     createCampaign: async (campaign) => {
         const response = await apiClient.post('/campaigns/', campaign);
-        return response.data;
+        const c = response.data;
+        return {
+            ...c,
+            sentCount: c.stats?.sent || 0,
+            deliveredCount: c.stats?.delivered || 0,
+            readCount: c.stats?.read || 0,
+            totalContacts: c.stats?.total || c.totalContacts || 0
+        };
     },
     // Using the stats endpoint which currently returns mock data from backend
     // Route is /campaigns/{id_or_name} in python
