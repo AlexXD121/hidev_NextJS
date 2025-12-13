@@ -1,6 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
-from models import User, Contact, Campaign, Message, Template
+from models import User, Contact, Campaign, Message, Template, SheetImport
 import os
 from dotenv import load_dotenv
 import certifi # Kept for safety, but unused in the connection below
@@ -35,11 +35,14 @@ async def init_db():
         print("✅ [SUCCESS] Connection Established! (SSL Verification Skipped)")
 
         print("🔄 [3/3] Initializing Beanie Models...")
+
         await init_beanie(database=client.whatsapp_dashboard, document_models=[
             User,
             Contact,
             Campaign,
-            Message
+            Message,
+            Template,
+            SheetImport
         ])
         print("✅ [SUCCESS] Database & Models Ready!")
 

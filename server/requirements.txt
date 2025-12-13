@@ -12,3 +12,6 @@ python-dotenv
 certifi
 passlib[bcrypt]
 pyjwt
+bcrypt
+email-validator
+requests

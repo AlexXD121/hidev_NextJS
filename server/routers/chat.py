@@ -1,5 +1,6 @@
 from fastapi import APIRouter, BackgroundTasks
 from typing import List
+from pydantic import BaseModel
 from models import Message, ChatSession, Contact
 import asyncio
 
@@ -66,7 +67,7 @@ class SendMessageRequest(BaseModel):
     chat_id: str
     text: str
 
-from pydantic import BaseModel
+
 
 @router.post("/send")
 async def send_message_alias(payload: SendMessageRequest, background_tasks: BackgroundTasks):
