@@ -29,6 +29,7 @@ class CampaignStatus(str, Enum):
     SCHEDULED = "scheduled"
     SENDING = "sending"
     COMPLETED = "completed"
+    FAILED = "failed"
 
 class TemplateCategory(str, Enum):
     MARKETING = "marketing"

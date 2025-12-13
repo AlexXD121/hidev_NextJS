@@ -14,6 +14,16 @@ import { ModeToggle } from "@/components/mode-toggle"
 import Image from "next/image"
 import { useAuthStore } from "@/store/useAuthStore"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const sidebarItems = [
   {
@@ -48,50 +58,21 @@ const sidebarItems = [
   },
 ]
 
-function LogoutButton({ isCollapsed }: { isCollapsed: boolean }) {
-  const logout = useAuthStore((state) => state.logout)
+
+export function Sidebar() {
+  const pathname = usePathname()
+  const [isCollapsed, setIsCollapsed] = useState(true)
+  const { user, logout } = useAuthStore()
+
+  const toggleSidebar = () => setIsCollapsed(!isCollapsed)
 
   const handleLogout = () => {
     logout()
     window.location.href = "/login"
   }
 
-  return (
-    <button
-      onClick={handleLogout}
-      className={cn(
-        "flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors relative group",
-        isCollapsed ? "justify-center" : "justify-start px-4"
-      )}
-    >
-      <LogOut className="h-5 w-5 shrink-0" />
-      <AnimatePresence>
-        {!isCollapsed && (
-          <motion.span
-            initial={{ opacity: 0, width: 0 }}
-            animate={{ opacity: 1, width: "auto" }}
-            exit={{ opacity: 0, width: 0 }}
-            className="overflow-hidden whitespace-nowrap"
-          >
-            Logout
-          </motion.span>
-        )}
-      </AnimatePresence>
-
-      {isCollapsed && (
-        <div className="absolute left-14 z-50 rounded bg-popover px-2 py-1 text-xs text-popover-foreground shadow-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
-          Logout
-        </div>
-      )}
-    </button>
-  )
-}
-
-export function Sidebar() {
-  const pathname = usePathname()
-  const [isCollapsed, setIsCollapsed] = useState(true)
-
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed)
+  // Fallback to mock user if not logged in (for development/preview)
+  const currentUser = user || CURRENT_USER
 
   return (
     <motion.div
@@ -135,8 +116,8 @@ export function Sidebar() {
         className={cn(
           "absolute z-50 hidden lg:flex items-center justify-center p-0 shadow-md border bg-background hover:bg-emerald-500/10 hover:text-emerald-500 transition-colors",
           isCollapsed
-            ? "left-1/2 -translate-x-1/2 top-[76px] h-6 w-6 rounded-full" // Smaller, neat circle below logo
-            : "right-4 top-8 h-8 w-8" // Inside right when expanded
+            ? "left-1/2 -translate-x-1/2 top-[76px] h-6 w-6 rounded-full"
+            : "right-4 top-8 h-8 w-8"
         )}
       >
         {isCollapsed ? <Menu className="h-3 w-3" /> : <ChevronLeft className="h-4 w-4" />}
@@ -175,7 +156,6 @@ export function Sidebar() {
                       )}
                     </AnimatePresence>
 
-                    {/* Active Indicator Line for Collapsed State */}
                     {isActive && isCollapsed && (
                       <div className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 bg-primary rounded-r-full shadow-[0_0_8px_rgba(37,211,102,0.6)]" />
                     )}
@@ -194,38 +174,67 @@ export function Sidebar() {
 
       {/* Footer / User Profile */}
       <div className="p-4 border-t bg-background/50">
-        <div className={cn("flex items-center gap-3 mb-4", isCollapsed ? "justify-center flex-col" : "justify-between")}>
-          <div className={cn("flex items-center gap-3", isCollapsed ? "justify-center" : "")}>
-            <Avatar className="h-9 w-9 border-2 border-primary/20 cursor-pointer hover:border-primary transition-colors">
-              <AvatarImage src={CURRENT_USER.avatar} alt={CURRENT_USER.name} />
-              <AvatarFallback>
-                {CURRENT_USER.name.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <AnimatePresence>
-              {!isCollapsed && (
-                <motion.div
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
-                  className="flex flex-col overflow-hidden whitespace-nowrap"
-                >
-                  <span className="text-sm font-medium">{CURRENT_USER.name}</span>
-                  <span className="text-xs text-muted-foreground truncate max-w-[100px]" title={CURRENT_USER.email}>
-                    {CURRENT_USER.email}
-                  </span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Mode Toggle - Hide text or adjust if collapsed, but usually ModeToggle is just an icon */}
-          <div className={cn("transition-all", isCollapsed ? "mt-2" : "")}>
-            <ModeToggle />
-          </div>
-        </div>
-
-        <LogoutButton isCollapsed={isCollapsed} />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className={cn("flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-accent transition-colors group", isCollapsed ? "justify-center flex-col" : "justify-between")}>
+              <div className={cn("flex items-center gap-3", isCollapsed ? "justify-center" : "")}>
+                <Avatar className="h-9 w-9 border-2 border-primary/20 group-hover:border-primary transition-colors">
+                  <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
+                  <AvatarFallback>
+                    {currentUser.name?.slice(0, 2).toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <AnimatePresence>
+                  {!isCollapsed && (
+                    <motion.div
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: "auto" }}
+                      exit={{ opacity: 0, width: 0 }}
+                      className="flex flex-col overflow-hidden whitespace-nowrap text-left"
+                    >
+                      <span className="text-sm font-medium truncate w-[140px]">{currentUser.name}</span>
+                      <span className="text-xs text-muted-foreground truncate w-[140px]">
+                        {currentUser.email}
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              {!isCollapsed && <Settings className="h-4 w-4 text-muted-foreground opacity-50 group-hover:opacity-100" />}
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end" side="right" forceMount>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">{currentUser.name}</p>
+                <p className="text-xs leading-none text-muted-foreground">{currentUser.email}</p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <Link href="/settings">
+                <DropdownMenuItem className="cursor-pointer">
+                  Profile
+                  <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/settings">
+                <DropdownMenuItem className="cursor-pointer">
+                  Settings
+                  <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              </Link>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="p-0 text-red-600 focus:text-red-500">
+              <div onClick={handleLogout} className="flex w-full items-center px-2 py-1.5 cursor-pointer">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+                <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+              </div>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </motion.div>
   )

@@ -46,74 +46,86 @@ export default function CampaignsPage() {
                 <CampaignAnalytics />
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {campaigns.map((campaign) => (
-                        <Card key={campaign.id}>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium truncate pr-2">
-                                    {campaign.name}
-                                </CardTitle>
-                                <Badge variant={
-                                    campaign.status === 'completed' ? 'default' :
-                                        campaign.status === 'sending' ? 'secondary' :
-                                            'outline'
-                                }>
-                                    {campaign.status}
-                                </Badge>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{campaign.sentCount} / {campaign.totalContacts}</div>
-                                <p className="text-xs text-muted-foreground mb-4">
-                                    Messages Sent
-                                </p>
+                    {campaigns.map((campaign, index) => {
+                        // Safe access to counts
+                        const sent = campaign.sentCount || 0;
+                        const delivered = campaign.deliveredCount || 0;
+                        const read = campaign.readCount || 0;
+                        const total = campaign.totalContacts || 0;
 
-                                <div className="space-y-2">
-                                    <Progress value={(campaign.sentCount / campaign.totalContacts) * 100} />
-                                    <div className="flex justify-between text-xs text-muted-foreground">
-                                        <span>Delivered: {campaign.deliveredCount}</span>
-                                        <span>Read: {campaign.readCount}</span>
+                        // Calculate progress safely
+                        const progress = total > 0 ? (sent / total) * 100 : 0;
+
+                        return (
+                            <Card key={campaign.id || index}>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium truncate pr-2">
+                                        {campaign.name}
+                                    </CardTitle>
+                                    <Badge variant={
+                                        campaign.status === 'completed' ? 'default' :
+                                            campaign.status === 'sending' ? 'secondary' :
+                                                'outline'
+                                    }>
+                                        {campaign.status}
+                                    </Badge>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">{sent} / {total}</div>
+                                    <p className="text-xs text-muted-foreground mb-4">
+                                        Messages Sent
+                                    </p>
+
+                                    <div className="space-y-2">
+                                        <Progress value={progress} />
+                                        <div className="flex justify-between text-xs text-muted-foreground">
+                                            <span>Delivered: {delivered}</span>
+                                            <span>Read: {read}</span>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div className="flex gap-2 mt-4">
-                                    {campaign.status === 'scheduled' && (
-                                        <Button
-                                            className="flex-1"
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => startSimulation(campaign.id)}
-                                        >
-                                            Start Simulation
-                                        </Button>
-                                    )}
-                                    {campaign.status === 'sending' && (
-                                        <Button
-                                            className="flex-1"
-                                            size="sm"
-                                            variant="outline"
-                                            disabled
-                                        >
-                                            Sending...
-                                        </Button>
-                                    )}
-                                    {(campaign.status === 'draft' || campaign.status === 'completed' || campaign.status === 'failed') && (
-                                        <Button
-                                            className="flex-1"
-                                            size="sm"
-                                            variant="secondary"
-                                            onClick={() => campaign.status === 'completed' || campaign.status === 'failed' ? window.location.href = `/campaigns/${campaign.id}` : null}
-                                            disabled={campaign.status === 'draft'}
-                                        >
-                                            {campaign.status === 'draft' ? 'Continue Setup' : 'View Report'}
-                                        </Button>
-                                    )}
 
-                                    <Button size="sm" variant="ghost" className="px-2" onClick={() => handleDuplicate(campaign.id)}>
-                                        <Copy className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+                                    <div className="flex gap-2 mt-4">
+                                        {campaign.status === 'scheduled' && (
+                                            <Button
+                                                className="flex-1"
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => startSimulation(campaign.id)}
+                                            >
+                                                Start Simulation
+                                            </Button>
+                                        )}
+                                        {campaign.status === 'sending' && (
+                                            <Button
+                                                className="flex-1"
+                                                size="sm"
+                                                variant="outline"
+                                                disabled
+                                            >
+                                                Sending...
+                                            </Button>
+                                        )}
+                                        {(campaign.status === 'draft' || campaign.status === 'completed' || campaign.status === 'failed') && (
+                                            <Button
+                                                className="flex-1"
+                                                size="sm"
+                                                variant="secondary"
+                                                onClick={() => campaign.status === 'completed' || campaign.status === 'failed' ? window.location.href = `/campaigns/${campaign.id}` : null}
+                                                disabled={campaign.status === 'draft'}
+                                            >
+                                                {campaign.status === 'draft' ? 'Continue Setup' : 'View Report'}
+                                            </Button>
+                                        )}
+
+                                        <Button size="sm" variant="ghost" className="px-2" onClick={() => handleDuplicate(campaign.id)}>
+                                            <Copy className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
                 </div>
             </div>
         </ScrollArea>
