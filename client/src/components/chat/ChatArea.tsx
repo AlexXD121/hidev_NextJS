@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
+
 import { MoreVertical, Paperclip, Search, Smile, Mic, Plus, MessageSquare, ChevronLeft } from "lucide-react"
 import { useChatStore } from "@/store/useChatStore"
 import { useCallStore } from "@/store/useCallStore"
@@ -126,15 +126,15 @@ export function ChatArea() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-hidden relative bg-chat">
-                <ScrollArea className="h-full px-8 md:px-[5%]" type="always">
+            <div className="flex-1 overflow-hidden relative bg-chat flex flex-col">
+                <div className="flex-1 h-full px-8 md:px-[5%] overflow-y-auto">
                     <div className="flex flex-col justify-end min-h-full py-4 pb-2">
                         {currentMessages.map((msg, index) => (
                             <MessageBubble key={`${msg.id}-${index}`} message={msg} isMe={msg.senderId === 'me'} />
                         ))}
                         <div ref={scrollRef} />
                     </div>
-                </ScrollArea>
+                </div>
             </div>
 
             {/* Input Area */}
