@@ -3,6 +3,7 @@
 ![Status](https://img.shields.io/badge/status-production--ready-success.svg?style=flat-square) ![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square) [![Live Demo](https://img.shields.io/badge/demo-online-green.svg?style=flat-square)](https://whatsapp-dashboard-orpin.vercel.app/)
 
 > **🔴 Live Demo:** [https://whatsapp-dashboard-orpin.vercel.app/](https://whatsapp-dashboard-orpin.vercel.app/)
+> **🎥 Video Demo:** [Watch on Google Drive](https://drive.google.com/file/d/18ICk2kxqfDn-ywMSd1kX6ZN3s_knwW5B/view?usp=drive_link)
 
 A professional, high-performance SaaS dashboard designed for WhatsApp marketing and customer engagement. Built with a modern **Next.js 14** frontend and a robust **FastAPI** backend, this project demonstrates a full-stack implementation compliant with modern web standards.
 
