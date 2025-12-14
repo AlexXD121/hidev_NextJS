@@ -119,7 +119,10 @@
 /* Custom Utilities */
 .bg-chat {
   background-color: var(--chat-background);
-  background-image: url("https://static.whatsapp.net/rsrc.php/v3/yl/r/gi_Dck4u57.png");
+  /* background-image: url("https://static.whatsapp.net/rsrc.php/v3/yl/r/gi_Dck4u57.png"); */
+  /* Replaced with simple pattern or color to avoid ORB errors */
+  background-image: radial-gradient(circle at center, rgba(0,0,0,0.02) 2px, transparent 2.5px);
+  background-size: 24px 24px;
   background-blend-mode: overlay;
 }
 

@@ -4,6 +4,9 @@ from database import init_db
 from models import Campaign, Template, CampaignStatus, TemplateCategory
 from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
+from models import Campaign, Template, CampaignStatus, TemplateCategory, Contact, Message
+import random
+from datetime import datetime, timedelta
 
 async def seed():
     # Connect to DB (using workaround settings from database.py)
@@ -24,7 +27,7 @@ async def seed():
         print("✅ Connected to MongoDB")
         
         # Initialize Beanie with explicit database
-        await init_beanie(database=client.whatsapp_dashboard, document_models=[Campaign, Template])
+        await init_beanie(database=client.whatsapp_dashboard, document_models=[Campaign, Template, Contact, Message])
     except Exception as e:
         print(f"❌ Connection failed: {e}")
         return
@@ -34,7 +37,46 @@ async def seed():
     # Clear existing data to ensure clean state
     await Template.delete_all()
     await Campaign.delete_all()
-    print("🧹 Cleared existing Templates and Campaigns.")
+    await Contact.delete_all()
+    await Message.delete_all()
+    print("🧹 Cleared existing Templates, Campaigns, Contacts, and Messages.")
+
+    # Seed Contacts
+    print("Creating Contacts...")
+    contacts_data = [
+        {"name": "Alice QA", "phone": "1234567890", "email": "alice@example.com", "tags": ["vip", "customer"], "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice"},
+        {"name": "Bob QA", "phone": "0987654321", "email": "bob@example.com", "tags": ["lead"], "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob"},
+        {"name": "Charlie QA", "phone": "5555555555", "email": "charlie@example.com", "tags": ["new"], "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie"},
+        {"name": "David QA", "phone": "1112223333", "email": "david@example.com", "tags": ["inactive"], "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=David"},
+        {"name": "Eve QA", "phone": "4445556666", "email": "eve@example.com", "tags": ["vip"], "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Eve"},
+    ]
+    
+    contacts = []
+    for c in contacts_data:
+        contact = Contact(
+            name=c["name"],
+            phone=c["phone"],
+            email=c["email"],
+            tags=c["tags"],
+            avatar=c["avatar"],
+            last_active=datetime.utcnow()
+        )
+        contacts.append(contact)
+    
+    await Contact.insert_many(contacts)
+    print(f"✅ Added {len(contacts)} contacts.")
+
+    # Seed Messages (for Chat functionality)
+    print("Creating Messages...")
+    msgs = []
+    # Chat for Alice
+    msgs.append(Message(chat_id=str(contacts[0].id), contact_id=str(contacts[0].id), sender_id=str(contacts[0].id), text="Hey there!", type="text", status="read", timestamp=datetime.utcnow() - timedelta(hours=2)))
+    msgs.append(Message(chat_id=str(contacts[0].id), contact_id=str(contacts[0].id), sender_id="me", text="Hello Alice! How can I help?", type="text", status="read", timestamp=datetime.utcnow() - timedelta(hours=1)))
+    # Chat for Bob
+    msgs.append(Message(chat_id=str(contacts[1].id), contact_id=str(contacts[1].id), sender_id=str(contacts[1].id), text="Is my order ready?", type="text", status="delivered", timestamp=datetime.utcnow() - timedelta(minutes=30)))
+
+    await Message.insert_many(msgs)
+    print(f"✅ Added {len(msgs)} messages.")
 
     # Seed Templates
     print("Creating Templates...")

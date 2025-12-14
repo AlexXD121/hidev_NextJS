@@ -20,10 +20,13 @@ export function ChatLayout() {
 
     return (
         <div className="flex h-full w-full bg-background overflow-hidden relative">
-            <div className={`h-full w-full lg:w-80 border-r bg-background ${selectedChatId ? "hidden lg:flex" : "flex"}`}>
+            {/* Sidebar Wrapper: 30% on Desktop, Full on Mobile (if no chat selected) */}
+            <div className={`h-full w-full lg:w-[30%] border-r bg-background ${selectedChatId ? "hidden lg:block" : "block"}`}>
                 <ChatSidebar />
             </div>
-            <div className={`flex-1 h-full ${!selectedChatId ? "hidden lg:flex" : "flex"}`}>
+
+            {/* Chat Area Wrapper: 70% on Desktop, Full on Mobile (if chat selected) */}
+            <div className={`flex-1 h-full lg:w-[70%] ${selectedChatId ? "block" : "hidden lg:block"}`}>
                 <ChatArea />
             </div>
         </div>
