@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, LogOut, Radio } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
+import { useTheme } from "next-themes"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { motion } from "framer-motion"
 
@@ -27,7 +28,9 @@ const profileSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileSchema>
 
 export default function SettingsPage() {
+    const { theme, setTheme } = useTheme()
     const { user, login, logout, updateUser } = useAuthStore()
+    const [mounted, setMounted] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [isFetching, setIsFetching] = useState(true)
 
@@ -38,6 +41,11 @@ export default function SettingsPage() {
             email: "",
         },
     })
+
+    // Prevent hydration mismatch
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     // Fetch latest user data on mount
     useEffect(() => {
@@ -195,9 +203,27 @@ export default function SettingsPage() {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         {/* Mock Theme Toggle */}
-                                        <Button variant="outline" size="sm">Light</Button>
-                                        <Button variant="default" size="sm">Dark</Button>
-                                        <Button variant="outline" size="sm">System</Button>
+                                        <Button
+                                            variant={mounted && theme === "light" ? "default" : "outline"}
+                                            size="sm"
+                                            onClick={() => setTheme("light")}
+                                        >
+                                            Light
+                                        </Button>
+                                        <Button
+                                            variant={mounted && theme === "dark" ? "default" : "outline"}
+                                            size="sm"
+                                            onClick={() => setTheme("dark")}
+                                        >
+                                            Dark
+                                        </Button>
+                                        <Button
+                                            variant={mounted && theme === "system" ? "default" : "outline"}
+                                            size="sm"
+                                            onClick={() => setTheme("system")}
+                                        >
+                                            System
+                                        </Button>
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between">

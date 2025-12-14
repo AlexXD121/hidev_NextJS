@@ -22,6 +22,11 @@ export const metadata: Metadata = {
   title: "WhatsApp Business Dashboard",
   description: "Manage your WhatsApp campaigns and chats",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icon-192x192.png",
+    shortcut: "/icon-192x192.png",
+    apple: "/icon-192x192.png",
+  },
 };
 
 export const viewport = {

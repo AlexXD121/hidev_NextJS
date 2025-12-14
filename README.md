@@ -62,6 +62,48 @@ A professional, high-performance SaaS dashboard designed for WhatsApp marketing 
 
 ---
 
+## ⚖️ Judge's Guide (Hackathon Context)
+
+**Why this project stands out:**
+
+1.  **Full-Stack Realism**: Not just a UI shell. It has a complete FastAPI backend with MongoDB, JWT Auth, and WebSockets.
+2.  **Complex State Management**: Uses `zustand` for global auth/chat state and `react-query` for server state sync.
+3.  **Real-Time Architecture**: Chat isn't polling; it's a live WebSocket connection handling multi-room events.
+4.  **Professional UI/UX**: Implements a "pixel-perfect" WhatsApp-style interface with responsive mobile adaptations.
+
+**Key Files to Review:**
+- **Frontend Architecture**: `client/src/app/(dashboard)/layout.tsx` (Dashboard Wrap), `client/src/store/useChatStore.ts` (WebSocket Logic).
+- **Backend Logic**: `server/routers/chat.py` (WS Manager), `server/main.py` (App Factory).
+- **Security**: `server/routers/auth.py` (JWT Implementation).
+
+---
+
+## 📖 User Manual
+
+### 1. Dashboard Overview
+- **Metrics**: See instantaneous counts of your Active Campaigns and Contacts.
+- **Activity Feed**: Live log of system events.
+
+### 2. Managing Contacts
+1.  Navigate to the **Contacts** tab.
+2.  **Add**: Click "Add Contact", fill in details.
+3.  **Edit/Delete**: Use the actions menu (...) on any contact row.
+4.  **Bulk Actions**: Select multiple contacts to delete them in one go.
+
+### 3. Launching Campaigns
+1.  Go to **Campaigns** -> **Create Campaign**.
+2.  **Step 1**: Name your campaign.
+3.  **Step 2**: Select message template (or write custom text).
+4.  **Step 3**: Select audience (All contacts or specific tags).
+5.  **Step 4**: Schedule or Send Now.
+
+### 4. Interactive Chat
+- Real-time messaging with any contact.
+- Supports Emoji picker and message status indicators (Sent/Delivered).
+- **Mobile Users**: Swipe or tap "Back" to return to the contact list.
+
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
