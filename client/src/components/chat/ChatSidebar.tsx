@@ -17,16 +17,10 @@ export function ChatSidebar() {
     const { chats, selectedChatId, selectChat, fetchChats, pollMessages } = useChatStore()
     const [searchQuery, setSearchQuery] = useState("")
 
-    // Initial fetch and polling setup
+    // Initial fetch setup
     useEffect(() => {
         fetchChats();
-
-        const interval = setInterval(() => {
-            pollMessages();
-        }, 5000); // Poll every 5 seconds
-
-        return () => clearInterval(interval);
-    }, [fetchChats, pollMessages]);
+    }, [fetchChats]);
 
     const filteredChats = chats.filter(chat =>
         chat.contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

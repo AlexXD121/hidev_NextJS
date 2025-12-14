@@ -188,14 +188,26 @@ export const useChatStore = create<ChatState>()(
 
             connectSocket: () => {
                 const { socket } = get();
+                // Only log if not already connecting/connected to avoid noise
                 if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
-                    return; // Already connected
+                    return;
                 }
 
-                // URL logic: default to localhost:8000 if not specified (adjust for Vercel if needed)
-                const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://127.0.0.1:8000/api/ws/dashboard_client";
+                // Verify Environment is Browser
+                if (typeof window === 'undefined') return;
 
-                console.log("🔌 Connecting to WebSocket:", wsUrl);
+                // URL logic: Use dynamic hostname to support localhost/127.0.0.1/IP access
+                const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+                const host = process.env.NEXT_PUBLIC_API_URL
+                    ? new URL(process.env.NEXT_PUBLIC_API_URL).hostname
+                    : window.location.hostname;
+                const port = "8000";
+
+                // If using NEXT_PUBLIC_WS_URL, use it, otherwise build it dynamically
+                const wsUrl = process.env.NEXT_PUBLIC_WS_URL || `${protocol}//${host}:${port}/api/ws/dashboard_client`;
+
+                // Quietly connect
+                // console.log("🔌 Connecting to WebSocket:", wsUrl);
                 const ws = new WebSocket(wsUrl);
 
                 ws.onopen = () => {
@@ -205,28 +217,26 @@ export const useChatStore = create<ChatState>()(
                 ws.onmessage = (event) => {
                     try {
                         const message: Message = JSON.parse(event.data);
-                        console.log("📩 WS Message:", message);
+                        // console.log("📩 WS Message:", message);
                         get().receiveMessage(message.chatId, message);
                     } catch (e) {
-                        console.error("Error parsing WS message:", e);
+                        // console.error("Error parsing WS message:", e);
                     }
                 };
 
                 ws.onclose = () => {
-                    console.log("❌ WebSocket Disconnected");
+                    // console.log("❌ WebSocket Disconnected");
                     set({ socket: null });
 
-                    // Auto-reconnect after 3 seconds if not intentionally disconnected
-                    // We can check a flag or just always try to reconnect if we are in a "should be connected" state.
-                    // For now, simple retry:
+                    // Auto-reconnect quietly
                     setTimeout(() => {
-                        console.log("🔄 Attempting Reconnect...");
                         get().connectSocket();
                     }, 3000);
                 };
 
-                ws.onerror = (error: Event) => {
-                    console.error("WebSocket Error:", error);
+                ws.onerror = (error: any) => {
+                    // Suppress "Connection Refused" noise during dev/reload
+                    console.warn("WebSocket Connection Error (Auto-reconnecting...)");
                     ws.close(); // Ensure close triggers reconnect
                 };
 
