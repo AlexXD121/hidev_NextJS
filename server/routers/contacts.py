@@ -13,6 +13,13 @@ async def create_contact(contact: Contact):
     await contact.insert()
     return contact
 
+@router.get("/{contact_id}", response_model=Contact)
+async def get_contact(contact_id: str):
+    contact = await Contact.get(contact_id)
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    return contact
+
 @router.delete("/{contact_id}")
 async def delete_contact(contact_id: str):
     contact = await Contact.get(contact_id)
@@ -20,6 +27,27 @@ async def delete_contact(contact_id: str):
         raise HTTPException(status_code=404, detail="Contact not found")
     await contact.delete()
     return {"ok": True}
+
+from pydantic import BaseModel
+from typing import Optional
+
+class UpdateContactRequest(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+@router.put("/{contact_id}", response_model=Contact)
+async def update_contact(contact_id: str, payload: UpdateContactRequest):
+    contact = await Contact.get(contact_id)
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    
+    # Update fields if provided
+    update_data = payload.model_dump(exclude_unset=True)
+    await contact.set(update_data)
+    
+    return contact
 
 @router.get("/tags", response_model=List[str])
 async def get_tags():
