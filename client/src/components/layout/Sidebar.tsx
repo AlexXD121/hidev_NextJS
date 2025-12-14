@@ -59,7 +59,11 @@ const sidebarItems = [
 ]
 
 
-export function Sidebar() {
+interface SidebarProps {
+  className?: string
+}
+
+export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(true)
   const { user, logout } = useAuthStore()
@@ -79,7 +83,7 @@ export function Sidebar() {
       initial={{ width: 80 }}
       animate={{ width: isCollapsed ? 80 : 256 }}
       transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
-      className="relative flex h-screen flex-col shrink-0 border-r bg-secondary/50 backdrop-blur-xl text-foreground z-40"
+      className={cn("relative hidden lg:flex h-screen flex-col shrink-0 border-r bg-secondary/50 backdrop-blur-xl text-foreground z-40", className)}
     >
       {/* Header / Logo */}
       <div className={cn("flex items-center gap-3 py-6 px-4 h-20", isCollapsed ? "justify-center" : "")}>
