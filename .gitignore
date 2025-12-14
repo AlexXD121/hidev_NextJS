@@ -37,3 +37,6 @@ server/venv/
 server/.pytest_cache/
 server/coverage.xml
 
+# Ignore deploy instructions
+deploy.md
+DEPLOY.md
