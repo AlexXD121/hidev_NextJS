@@ -277,8 +277,8 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
 
     return (
         <div className="w-full">
-            <div className="flex items-center py-4 justify-between">
-                <div className="relative w-full max-w-sm">
+            <div className="flex flex-col md:flex-row items-start md:items-center py-4 justify-between gap-4">
+                <div className="relative w-full md:max-w-sm">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder="Filter contacts..."
@@ -286,10 +286,10 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
                         onChange={(event) =>
                             table.getColumn("name")?.setFilterValue(event.target.value)
                         }
-                        className="pl-8 focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+                        className="pl-8 focus:ring-2 focus:ring-primary/20 transition-all duration-300 w-full"
                     />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 w-full md:w-auto">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <motion.div whileTap={{ scale: 0.95 }}>
@@ -308,7 +308,7 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <Button variant="outline" className="ml-auto">
+                    <Button variant="outline" className="ml-auto md:ml-0">
                         Columns <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>
                     <motion.div whileTap={{ scale: 0.95 }}>

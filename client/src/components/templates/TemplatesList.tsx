@@ -57,9 +57,9 @@ export default function TemplatesList() {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
-                <div className="flex gap-2 w-full sm:w-auto">
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <Select value={filterCategory || "ALL"} onValueChange={(val) => setFilterCategory(val === "ALL" ? null : val)}>
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-full sm:w-[180px]">
                             <Filter className="mr-2 h-4 w-4" />
                             <SelectValue placeholder="Category" />
                         </SelectTrigger>

@@ -14,7 +14,7 @@ export default function ContactsPage() {
 
     return (
         <ScrollArea className="h-full w-full">
-            <div className="h-full w-full flex-1 flex flex-col space-y-8 p-8">
+            <div className="h-full w-full flex-1 flex flex-col space-y-8 p-4 md:p-8">
                 <div className="flex items-center justify-between space-y-2">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight">Contacts</h2>
