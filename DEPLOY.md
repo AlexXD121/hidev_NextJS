@@ -24,7 +24,7 @@ We will use the included `server/render.yaml` Blueprint.
     *   Click **New +** -> **Blueprint**.
     *   Connect your repository.
 3.  **Service Configuration**:
-    *   Render will detect `server/render.yaml`.
+    *   Render will detect `render.yaml` in the root.
     *   Click **Apply**.
 4.  **Environment Variables**:
     *   Go to the newly created Service -> **Environment**.
