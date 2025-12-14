@@ -130,7 +130,7 @@ export default function LoginPage() {
                     <div className="space-y-4 pt-4">
                         <FeatureRow icon={BarChart3} title="Advanced Analytics" description="Track delivery rates and engagement in real-time." delay={0.4} />
                         <FeatureRow icon={Users} title="CRM Integration" description="Seamlessly manage contacts and customer data." delay={0.5} />
-                        <FeatureRow icon={Zap} title="Smart Bots" description="Automate responses with AI-powered chatbots." delay={0.6} />
+                        <FeatureRow icon={Zap} title="Campaign Manager" description="Launch targeted marketing campaigns with ease." delay={0.6} />
                     </div>
                 </div>
 
