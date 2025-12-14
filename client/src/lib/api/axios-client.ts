@@ -4,18 +4,35 @@ import { useAuthStore } from '@/store/useAuthStore';
 const getTime = () => new Date().toISOString();
 
 const getBaseUrl = () => {
-    let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-    // Ensure it doesn't end with a slash for consistency before appending /api is checked
-    if (url.endsWith('/')) {
-        url = url.slice(0, -1);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+
+    try {
+        // Use URL object to handle diverse input formats safely
+        const url = new URL(apiUrl, window.location.origin);
+
+        // Remove trailing slash for consistency
+        if (url.pathname.endsWith('/')) {
+            url.pathname = url.pathname.slice(0, -1);
+        }
+
+        // Ensure it ends with /api
+        if (!url.pathname.endsWith('/api')) {
+            console.warn(`[Axios] BASE_URL '${apiUrl}' seems to be missing '/api' suffix. Appending it automatically.`);
+            url.pathname += '/api';
+        }
+
+        return url.toString();
+    } catch (e) {
+        // Fallback for relative URLs or invalid inputs
+        let url = apiUrl;
+        if (url.endsWith('/')) {
+            url = url.slice(0, -1);
+        }
+        if (!url.endsWith('/api')) {
+            url += '/api';
+        }
+        return url;
     }
-    // If it points to the root of the python server (likely localhost:8000), it needs /api appended
-    // because the backend mounts all routers under /api.
-    if (!url.endsWith('/api')) {
-        console.warn(`[Axios] BASE_URL '${url}' seems to be missing '/api' suffix. Appending it automatically.`);
-        url += '/api';
-    }
-    return url;
 }
 
 const BASE_URL = getBaseUrl();
