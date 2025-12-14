@@ -1,11 +1,39 @@
-# General
+# --- Global ---
 .DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+
+# --- Environment Secrets (CRITICAL) ---
 .env
 .env.*
-node_modules/
-venv/
-__pycache__/
+!.env.example
+*.pem
+*.key
 
-# Sub-projects
+# --- Dependencies ---
+node_modules/
+# Python venvs (cover multiple naming conventions)
+venv/
+env/
+.venv/
+.env/
+
+# --- Build Outputs ---
+dist/
+build/
+out/
+.next/
+*.pyc
+__pycache__/
+*.egg-info/
+
+# --- Sub-Project Specifics ---
 client/.next/
+client/node_modules/
 server/__pycache__/
+server/venv/
+server/.pytest_cache/
+server/coverage.xml
+
