@@ -1,120 +1,175 @@
-# 🟢 WhatsApp Marketing Dashboard
+# 🟢 WhatsApp Business Dashboard (Next.js 14 + FastAPI)
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg?style=flat-square) ![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square) ![Status](https://img.shields.io/badge/status-production--ready-success.svg?style=flat-square)
+![Status](https://img.shields.io/badge/status-production--ready-success.svg?style=flat-square) ![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)
 
-A professional, production-ready SaaS dashboard designed to streamline WhatsApp marketing campaigns. Manage contacts, design templates, send broadcasts, and engage with customers in real-time.
-
-![Dashboard Preview](https://via.placeholder.com/1200x600?text=WhatsApp+Dashboard+Preview)
+A professional, high-performance SaaS dashboard designed for WhatsApp marketing and customer engagement. Built with a modern **Next.js 14** frontend and a robust **FastAPI** backend, this project demonstrates a full-stack implementation compliant with modern web standards.
 
 ---
 
-## ✨ Key Features
+## 🌟 Key Features
 
-- **🔐 Robust Authentication**: Secure user access with JWT tokens and Bcrypt hashing.
-- **👥 Contact Management**: Easily add, tag, and filter your customer base. Support for bulk operations.
-- **💬 Real-Time Live Chat**: A WhatsApp-Web style interface for 1:1 customer support.
-- **📢 Campaign Wizard**: Step-by-step flow to create, schedule, and launch marketing broadcasts.
-- **📊 Detailed Analytics**: Track delivery rates, read receipts, and campaign performance at a glance.
-- **📝 Template Builder**: Create and manage message templates with dynamic placeholders and approval statuses.
-- **🎨 Modern UX/UI**: Built with **Next.js 14**, **Tailwind CSS**, and **Shadcn UI** for a sleek, responsive experience (Dark Mode included).
+### 🏢 Dashboard & Analytics
+- **Real-time Overview**: Stats cards for Contacts, Campaigns, and Messages.
+- **Visual Charts**: Interactive charts powered by `recharts` to track engagement trends.
+- **Recent Activity**: Activity feed tracking campaign launches and message events.
+
+### 👥 Contact Management
+- **CRUD Operations**: Complete Add, Edit, Delete workflows.
+- **Advanced Filtering**: Search by name, phone, or tags.
+- **Bulk Operations**: Select multiple contacts for bulk deletion or campaign targeting.
+- **Responsive Tables**: Optimized data grids that adapt to mobile and desktop screens.
+
+### 💬 Live Chat System
+- **Real-Time Messaging**: WebSocket-powered chat interface (`server/routers/chat.py`).
+- **Responsive Layout**: "Stack-and-slide" mobile navigation (WhatsApp Web style).
+- **Message Status**: UI indicators for Sent, Delivered, and Read statuses.
+- **Emoji Support**: Integrated emoji picker for rich communication.
+
+### 📢 Campaign Management
+- **Campaign Wizard**: Step-by-step creation flow for marketing broadcasts.
+- **Scheduling**: Set launch times for future campaigns.
+- **Google Sheets Integration**: Import contacts directly from Sheets (Mock/Prototype).
+
+### ⚙️ Settings & User Profile
+- **Profile Management**: Update user details and preferences.
+- **Security**: JWT-based authentication with secure password hashing.
+- **Theme Support**: Fully integrated Dark Mode matching WhatsApp's native palette.
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Client (Frontend)
-- **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) & [Shadcn UI](https://ui.shadcn.com/)
-- **State**: [Zustand](https://docs.pmnd.rs/zustand)
-- **Validation**: Zod & React Hook Form
-- **Icons**: Lucide React
+| Technology | Usage |
+| :--- | :--- |
+| **Next.js 14** | App Router, Server Components, Server Actions |
+| **TypeScript** | Strict type safety across the entire codebase |
+| **Tailwind CSS** | Utility-first styling with responsive design |
+| **Shadcn UI** | High-quality accessible components (Radix UI based) |
+| **Zustand** | Lightweight global state management |
+| **Zod + React Hook Form** | Robust form validation and handling |
+| **Framer Motion** | Smooth animations and transitions |
 
 ### Server (Backend)
-- **Framework**: [FastAPI](https://fastapi.tiangolo.com/) (Python 3.11+)
-- **Database**: [MongoDB Atlas](https://www.mongodb.com/atlas)
-- **ODM**: [Beanie](https://beanie-odm.dev/) (Async)
-- **Validation**: Pydantic v2
-- **Auth**: PyJWT & Passlib
+| Technology | Usage |
+| :--- | :--- |
+| **FastAPI** | High-performance async Python web framework |
+| **MongoDB Atlas** | NoSQL database for flexible data modeling |
+| **Beanie (Motor)** | Asynchronous ODM for MongoDB |
+| **Pydantic v2** | Data validation and serialization |
+| **PyJWT** | Secure token-based authentication |
+| **WebSockets** | Real-time bi-directional communication |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Node.js**: v18 or higher
-- **Python**: v3.11 or higher
-- **MongoDB**: Access to a MongoDB Atlas cluster or local instance.
+- **Node.js**: v18+
+- **Python**: v3.11+
+- **MongoDB**: Atlas Cluster or Local Instance
 
-### 1. Backend Setup
-Navigate to the server directory and set up the Python environment.
+### 1. Backend Setup (`/server`)
 
 ```bash
 cd server
+
+# Create virtual environment
 python -m venv venv
+# Activate: 
+#   Windows: .\venv\Scripts\activate
+#   Mac/Linux: source venv/bin/activate
 
-# Windows
-.\venv\Scripts\activate
-# Mac/Linux
-source venv/bin/activate
-
+# Install dependencies
 pip install -r requirements.txt
+
+# Create .env file
+# (See Environment Variables section below)
 ```
-
-#### Environment Variables for Backend
-Create a `.env` file in the `server/` directory:
-
-| Variable | Description | Example |
-| :--- | :--- | :--- |
-| `MONGO_URI` | Connection string for MongoDB | `mongodb+srv://user:pass@cluster...` |
-| `JWT_SECRET` | Secret key for signing tokens | `super_secret_key_123` |
 
 **Run the Server:**
 ```bash
 python -m uvicorn main:app --reload
-# Server starts at: http://localhost:8000
-# API Docs available at: http://localhost:8000/docs
+# API runs at: http://localhost:8000
+# Swagger Docs: http://localhost:8000/docs
 ```
 
-### 2. Frontend Setup
-Navigate to the client directory and install dependencies.
+### 2. Frontend Setup (`/client`)
 
 ```bash
 cd client
+
+# Install dependencies
 npm install
+
+# Run development server
+npm run dev
+# App runs at: http://localhost:3000
 ```
 
-**Run the Client:**
-```bash
-npm run dev
-# App starts at: http://localhost:3000
+---
+
+## 🔐 Environment Variables
+
+Create a `.env` file in the `server/` directory:
+
+```ini
+APP_ENV=development
+MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/whatsapp_dashboard
+JWT_SECRET=your_super_secret_key_change_this_in_prod
+FRONTEND_URL=http://localhost:3000
 ```
 
 ---
 
 ## 📂 Project Structure
 
-```bash
-├── client/                 # Next.js Application
-│   ├── src/
-│   │   ├── app/            # Pages & Routes
-│   │   ├── components/     # UI Building Blocks
-│   │   ├── lib/            # Utilities & API Logic
-│   │   └── store/          # Global State (Zustand)
+```
+├── client/                 # Next.js Frontend
+│   ├── src/app             # App Router Pages
+│   ├── src/components      # Reusable UI Components
+│   ├── src/lib             # API Clients & Utils
+│   ├── src/store           # Zustand Stores
+│   └── public/             # Static Assets (Icons, Images)
 │
-└── server/                 # FastAPI Service
-    ├── routers/            # API Route Handlers
-    ├── models.py           # Database Schemas
-    ├── database.py         # DB Connection Logic
-    └── main.py             # Application Entry Point
+├── server/                 # FastAPI Backend
+│   ├── routers/            # API Endpoints (Auth, Chat, etc.)
+│   ├── models.py           # Database Schemas (Beanie)
+│   ├── database.py         # DB Connection Logic
+│   ├── verify_*.py         # System Verification Scripts
+│   └── main.py             # App Entry Point
+│
+└── README.md               # Documentation
 ```
 
-## 🛡️ Verification & Testing
-To ensure the system is running correctly, you can run the included verification scripts:
+---
 
+## ✅ Verification & Testing
+
+This project includes a suite of verification scripts to ensure system integrity.
+
+**Run All Backend Tests:**
 ```bash
-# Verify system components
-python server/verify_system.py
+python server/verify_db_backend.py
 ```
+*Checks: DB Connection, User Auth, Contact CRUD, Error Handling.*
 
-## 📄 License
-This project is licensed under the [MIT License](LICENSE).
+**Run Integration Test:**
+```bash
+python server/verify_integration.py
+```
+*Checks: Full frontend-to-backend data flow simulation.*
+
+---
+
+## 🎨 UI & Design System
+
+The application strictly adheres to the **WhatsApp Business** visual identity:
+- **Primary Teal**: `#008069` (Light) / `#00A884` (Dark)
+- **Backgrounds**: Carefully matched grey/blue tones for reduced eye strain.
+- **Responsiveness**: Mobile-first architecture using Tailwind's `md:` and `lg:` breakpoints.
+
+---
+
+## 📜 License
+This project is open-source and available under the [MIT License](LICENSE).
