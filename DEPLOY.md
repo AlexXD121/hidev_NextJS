@@ -65,4 +65,19 @@ We will use the included `server/render.yaml` Blueprint.
     *   Register a new user.
     *   Check if you can login and create a contact.
 
+---
+
+## 🐳 Part 5: Docker Deployment (Self-Hosted)
+For running the full stack locally or on a VPS (AWS/DigitalOcean) using Docker.
+
+1.  **Prerequisites**: Ensure Docker & Docker Compose are installed.
+2.  **Environment**: Ensure `.env` is created in `server/` as per the README.
+3.  **Run**:
+    ```bash
+    docker-compose up -d --build
+    ```
+4.  **Access**:
+    *   **Frontend**: `http://localhost:3000`
+    *   **Backend**: `http://localhost:8000`
+
 🎉 **Deployment Complete!**
