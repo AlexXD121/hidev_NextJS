@@ -100,14 +100,14 @@ export function Sidebar({ className, isMobile = false, onClose }: SidebarProps) 
       )}
     >
       {/* Header / Logo */}
-      <div className={cn("flex items-center gap-3 py-6 px-4 h-20", isCollapsed && !isMobile ? "justify-center" : "")}>
-        <div className="relative h-10 w-10 shrink-0 rounded-xl overflow-hidden shadow-sm transition-all duration-300 hover:scale-105">
+      <div className={cn("flex items-center gap-2 py-6 px-4 h-20", isCollapsed && !isMobile ? "justify-center" : "pr-14")}>
+        <div className="relative h-8 w-8 shrink-0 rounded-xl overflow-hidden shadow-sm transition-all duration-300 hover:scale-105">
           <Image
             src="/icon-192x192.png"
             alt="Logo"
             fill
             className="object-cover"
-            sizes="40px"
+            sizes="32px"
             priority
           />
         </div>
@@ -119,15 +119,10 @@ export function Sidebar({ className, isMobile = false, onClose }: SidebarProps) 
               exit={{ opacity: 0, width: 0 }}
               className="flex flex-col overflow-hidden whitespace-nowrap"
             >
-              <span className="text-lg font-bold tracking-tight text-foreground">      <div className="flex px-6 py-6 items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500">
-                  <MessageSquare className="h-5 w-5 text-white" />
-                </div>
-                <span className="font-bold text-lg text-emerald-950 dark:text-emerald-50">
-                  WhatsApp Business
-                </span>
-              </div></span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Dashboard</span>
+              <span className="text-sm font-bold tracking-tight text-foreground truncate">
+                WhatsApp Business
+              </span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold truncate">Dashboard</span>
             </motion.div>
           )}
         </AnimatePresence>
