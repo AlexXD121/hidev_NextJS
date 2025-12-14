@@ -12,7 +12,7 @@ services:
       - FRONTEND_URL=http://localhost:3000
       - APP_ENV=development
     volumes:
-      - ./server:/app  # Hot-reloading for local dev
+      - ./server:/app # Hot-reloading for local dev
     restart: unless-stopped
 
   frontend:
@@ -21,11 +21,11 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # In Docker, frontend calling backend needs the internal service name if SSR (server-side)
-      # But most calls are Client-Side (Next.js Public), which hit 'localhost' from user's browser.
-      # For SSR fetch (if any), use http://backend:8000
       - NEXT_PUBLIC_API_URL=http://localhost:8000/api
       - NEXT_PUBLIC_WS_URL=ws://localhost:8000/api/ws/dashboard_client
     depends_on:
       - backend
     restart: unless-stopped
+    # For production, remove the volumes to use the built image artifact
+    # volumes:
+    #   - ./client:/app

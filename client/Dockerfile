@@ -1,19 +1,40 @@
-# Development Dockerfile
-FROM node:18-slim
-
+# Stage 1: Dependencies
+FROM node:20-alpine AS deps
 WORKDIR /app
-
-# Copy package files
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
 COPY package.json package-lock.json* ./
+RUN npm ci
 
-# Install dependencies
-RUN npm install
-
-# Copy source code
+# Stage 2: Builder
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Disable telemetry during build
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run build
 
-# Expose port
+# Stage 3: Runner
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+# We need to ensure 'output: "standalone"' is set in next.config.ts (which we verified)
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
 EXPOSE 3000
-
-# Start in development mode
-CMD ["npm", "run", "dev"]
+ENV PORT=3000
+# server.js is created by next build from the standalone output
+CMD ["node", "server.js"]

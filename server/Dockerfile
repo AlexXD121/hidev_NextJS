@@ -1,19 +1,25 @@
 # Base Image
-FROM python:3.10-slim
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies (if needed later, e.g., gcc)
-# RUN apt-get update && apt-get install -y gcc
+# Install system dependencies (keep minimal)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# Copy requirements first for cache optimization
 COPY requirements.txt .
 
-# Install dependencies
+# Install python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app code
+# Copy application code
 COPY . .
 
 # Expose port
