@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 import { Message } from "@/types"
 import { format } from "date-fns"
 import { Check, CheckCheck } from "lucide-react"
+import { motion } from "framer-motion"
 
 interface MessageBubbleProps {
     message: Message
@@ -12,12 +13,17 @@ interface MessageBubbleProps {
 
 export function MessageBubble({ message, isMe }: MessageBubbleProps) {
     return (
-        <div className={cn(
-            "flex w-full mb-2",
-            isMe ? "justify-end" : "justify-start"
-        )}>
+        <motion.div
+            initial={{ opacity: 0, scale: 0.5, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className={cn(
+                "flex w-full mb-2",
+                isMe ? "justify-end" : "justify-start"
+            )}
+        >
             <div className={cn(
-                "max-w-[70%] px-3 py-1.5 rounded-lg text-sm shadow-sm relative group",
+                "max-w-[70%] px-3 py-1.5 rounded-lg text-sm shadow-sm relative group transition-all duration-200 hover:shadow-md",
                 isMe ? "bg-[var(--bubble-out)] text-foreground rounded-tr-none" : "bg-[var(--bubble-in)] text-foreground rounded-tl-none",
                 // Tail pseudo-elements
                 isMe ?
@@ -49,6 +55,6 @@ export function MessageBubble({ message, isMe }: MessageBubbleProps) {
                     )}
                 </div>
             </div>
-        </div>
+        </motion.div>
     )
 }

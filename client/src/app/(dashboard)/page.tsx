@@ -147,8 +147,9 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* Stats Cards Grid */}
+      {/* Stats Cards Grid - Mobile: 1 Col, Tablet: 2 Cols, Desktop: 4 Cols */}
       <motion.div
-        className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+        className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
         variants={itemVariants}
       >
         <>

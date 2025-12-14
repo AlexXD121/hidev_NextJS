@@ -121,7 +121,7 @@
   background-color: var(--chat-background);
   /* background-image: url("https://static.whatsapp.net/rsrc.php/v3/yl/r/gi_Dck4u57.png"); */
   /* Replaced with simple pattern or color to avoid ORB errors */
-  background-image: radial-gradient(circle at center, rgba(0,0,0,0.02) 2px, transparent 2.5px);
+  background-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.02) 2px, transparent 2.5px);
   background-size: 24px 24px;
   background-blend-mode: overlay;
 }
@@ -129,4 +129,18 @@
 .dark .bg-chat {
   background-blend-mode: soft-light;
   opacity: 0.95;
+}
+
+/* Glassmorphism Utility */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.dark .glass {
+  background: rgba(17, 27, 33, 0.7);
+  /* WhatsApp Dark #111B21 with opacity */
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }

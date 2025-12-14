@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -36,12 +37,15 @@ import {
     TableCell,
     TableHead,
     TableHeader,
+    TableHeader as TableHeaderType,
     TableRow,
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Contact } from "@/types"
 import { useContactsStore } from "@/store/useContactsStore"
+import { useChatStore } from "@/store/useChatStore"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -55,15 +59,20 @@ interface ContactsTableProps {
 
 export function ContactsTable({ data, isLoading }: ContactsTableProps) {
     const { deleteContact } = useContactsStore()
+    const { startChat } = useChatStore()
+    const router = useRouter()
+
     const [sorting, setSorting] = React.useState<SortingState>([])
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-        []
-    )
-    const [columnVisibility, setColumnVisibility] =
-        React.useState<VisibilityState>({})
+    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
     const [isAddContactOpen, setIsAddContactOpen] = React.useState(false)
     const [selectedContact, setSelectedContact] = React.useState<Contact | null>(null)
+
+    const handleStartChat = (contact: Contact) => {
+        startChat(contact)
+        router.push('/chat')
+    }
 
     const columns = React.useMemo<ColumnDef<Contact>[]>(() => [
         {
@@ -117,10 +126,9 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
             accessorKey: "phone",
             header: "Phone",
             cell: ({ row }: CellContext<Contact, unknown>) => <div>{row.getValue("phone")}</div>,
-            enableHiding: true, // Allow hiding
-            // Hide on small screens
+            enableHiding: true,
             meta: {
-                className: "hidden md:table-cell"
+                className: "table-cell"
             }
         },
         {
@@ -139,7 +147,7 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
                 )
             },
             meta: {
-                className: "hidden lg:table-cell" // Hide tags on mobile/tablet
+                className: "hidden lg:table-cell"
             }
         },
         {
@@ -149,7 +157,7 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
                     <Button
                         variant="ghost"
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                        className="hidden md:flex" // Hide header button
+                        className="hidden md:flex"
                     >
                         Last Active
                         <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -187,7 +195,7 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => setSelectedContact(contact)}>View details</DropdownMenuItem>
-                            <DropdownMenuItem>Start chat</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleStartChat(contact)}>Start chat</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )
@@ -195,12 +203,10 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
         },
     ], [])
 
-    // Mock Bulk Actions
     const handleExport = () => {
         const selectedRows = table.getFilteredSelectedRowModel().rows
         const dataToExport = selectedRows.map(row => row.original)
         console.log("Exporting", dataToExport)
-        // In real app: convert to CSV and download
         const headers = ["Name", "Phone", "Last Active"]
         const csvContent = "data:text/csv;charset=utf-8,"
             + headers.join(",") + "\n"
@@ -246,6 +252,29 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
         },
     })
 
+    const MotionTableRow = motion.create(TableRow)
+    const MotionTableBody = motion.create(TableBody)
+
+    const tableContainerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                delayChildren: 0.1,
+                staggerChildren: 0.05
+            }
+        }
+    } as any
+
+    const tableRowVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { type: "spring", stiffness: 300, damping: 24 }
+        }
+    } as any
+
     return (
         <div className="w-full">
             <div className="flex items-center py-4 justify-between">
@@ -257,57 +286,54 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
                         onChange={(event) =>
                             table.getColumn("name")?.setFilterValue(event.target.value)
                         }
-                        className="pl-8"
+                        className="pl-8 focus:ring-2 focus:ring-primary/20 transition-all duration-300"
                     />
                 </div>
                 <div className="flex gap-2">
-                    {/* Placeholder for Tag Filter */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="h-8 border-dashed">
-                                <Plus className="mr-2 h-4 w-4" />
-                                Filter Tags
-                            </Button>
+                            <motion.div whileTap={{ scale: 0.95 }}>
+                                <Button variant="outline" size="sm" className="h-8 border-dashed">
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Filter Tags
+                                </Button>
+                            </motion.div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-[200px]">
                             <DropdownMenuLabel>Filter by Tag</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuCheckboxItem checked>
-                                VIP
-                            </DropdownMenuCheckboxItem>
-                            <DropdownMenuCheckboxItem>
-                                Lead
-                            </DropdownMenuCheckboxItem>
-                            <DropdownMenuCheckboxItem>
-                                Customer
-                            </DropdownMenuCheckboxItem>
+                            <DropdownMenuCheckboxItem checked>VIP</DropdownMenuCheckboxItem>
+                            <DropdownMenuCheckboxItem>Lead</DropdownMenuCheckboxItem>
+                            <DropdownMenuCheckboxItem>Customer</DropdownMenuCheckboxItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
 
                     <Button variant="outline" className="ml-auto">
                         Columns <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>
-                    <Button onClick={() => setIsAddContactOpen(true)}>
-                        <Plus className="mr-2 h-4 w-4" /> Add Contact
-                    </Button>
+                    <motion.div whileTap={{ scale: 0.95 }}>
+                        <Button onClick={() => setIsAddContactOpen(true)}>
+                            <Plus className="mr-2 h-4 w-4" /> Add Contact
+                        </Button>
+                    </motion.div>
                 </div>
             </div>
+
             <AddContactForm open={isAddContactOpen} onOpenChange={setIsAddContactOpen} />
             <ContactDetailsSheet
                 contact={selectedContact}
                 open={!!selectedContact}
                 onOpenChange={(open) => !open && setSelectedContact(null)}
             />
-            <div className="rounded-md border bg-card overflow-x-auto">
+
+            <div className="rounded-md border bg-card overflow-hidden overflow-x-auto">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
-                                    // Access custom meta className (safe cast if needed)
                                     // @ts-ignore
                                     const className = header.column.columnDef.meta?.className
-
                                     return (
                                         <TableHead key={header.id} className={className}>
                                             {header.isPlaceholder
@@ -322,7 +348,11 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
                             </TableRow>
                         ))}
                     </TableHeader>
-                    <TableBody>
+                    <MotionTableBody
+                        variants={tableContainerVariants}
+                        initial="hidden"
+                        animate="visible"
+                    >
                         {isLoading ? (
                             Array.from({ length: 5 }).map((_, index) => (
                                 <TableRow key={index}>
@@ -334,25 +364,30 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
                                 </TableRow>
                             ))
                         ) : table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && "selected"}
-                                >
-                                    {row.getVisibleCells().map((cell) => {
-                                        // @ts-ignore
-                                        const className = cell.column.columnDef.meta?.className
-                                        return (
-                                            <TableCell key={cell.id} className={className}>
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext()
-                                                )}
-                                            </TableCell>
-                                        )
-                                    })}
-                                </TableRow>
-                            ))
+                            <AnimatePresence>
+                                {table.getRowModel().rows.map((row) => (
+                                    <MotionTableRow
+                                        key={row.id}
+                                        data-state={row.getIsSelected() && "selected"}
+                                        variants={tableRowVariants}
+                                        whileHover={{ scale: 1.01, backgroundColor: "var(--muted)" }}
+                                        className="group transition-colors"
+                                    >
+                                        {row.getVisibleCells().map((cell) => {
+                                            // @ts-ignore
+                                            const className = cell.column.columnDef.meta?.className
+                                            return (
+                                                <TableCell key={cell.id} className={className}>
+                                                    {flexRender(
+                                                        cell.column.columnDef.cell,
+                                                        cell.getContext()
+                                                    )}
+                                                </TableCell>
+                                            )
+                                        })}
+                                    </MotionTableRow>
+                                ))}
+                            </AnimatePresence>
                         ) : (
                             <TableRow>
                                 <TableCell
@@ -363,9 +398,10 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
                                 </TableCell>
                             </TableRow>
                         )}
-                    </TableBody>
+                    </MotionTableBody>
                 </Table>
             </div>
+
             <div className="flex items-center justify-end space-x-2 py-4">
                 <div className="flex-1 text-sm text-muted-foreground flex items-center gap-4">
                     <span>
