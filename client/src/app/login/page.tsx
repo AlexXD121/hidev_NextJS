@@ -6,15 +6,12 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LayoutDashboard, MessageSquare, BarChart3, Users, Zap, CheckCircle2, ArrowRight, Loader2 } from "lucide-react"
+import { BarChart3, Users, Zap, CheckCircle2, Loader2, MessageSquare } from "lucide-react"
 import { toast } from "sonner"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { cn } from "@/lib/utils"
-// Turbo: Add framer-motion for animations
 import { motion, AnimatePresence } from "framer-motion"
 
 const loginSchema = z.object({
@@ -103,10 +100,8 @@ export default function LoginPage() {
                 className="hidden h-full flex-col justify-between bg-[#111B21] p-10 text-white lg:flex"
             >
                 <div className="flex items-center gap-2 text-lg font-medium">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500">
-                        <MessageSquare className="h-5 w-5 text-white" />
-                    </div>
-                    WhatsApp Biz
+                    <img src="/icon-192x192.png" alt="Logo" className="h-8 w-8" />
+                    WhatsApp Business Dashboard
                 </div>
 
                 <div className="space-y-6 max-w-md">
@@ -282,6 +277,7 @@ export default function LoginPage() {
                                 )}
                             </AnimatePresence>
                         </div>
+
                     </Tabs>
 
                     <p className="px-8 text-center text-sm text-muted-foreground">
