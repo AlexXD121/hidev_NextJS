@@ -1,6 +1,8 @@
 # 🟢 WhatsApp Business Dashboard (Next.js 14 + FastAPI)
 
-![Status](https://img.shields.io/badge/status-production--ready-success.svg?style=flat-square) ![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)
+![Status](https://img.shields.io/badge/status-production--ready-success.svg?style=flat-square) ![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square) [![Live Demo](https://img.shields.io/badge/demo-online-green.svg?style=flat-square)](https://whatsapp-dashboard-orpin.vercel.app/)
+
+> **🔴 Live Demo:** [https://whatsapp-dashboard-orpin.vercel.app/](https://whatsapp-dashboard-orpin.vercel.app/)
 
 A professional, high-performance SaaS dashboard designed for WhatsApp marketing and customer engagement. Built with a modern **Next.js 14** frontend and a robust **FastAPI** backend, this project demonstrates a full-stack implementation compliant with modern web standards.
 
@@ -70,6 +72,12 @@ A professional, high-performance SaaS dashboard designed for WhatsApp marketing 
 2.  **Complex State Management**: Uses `zustand` for global auth/chat state and `react-query` for server state sync.
 3.  **Real-Time Architecture**: Chat isn't polling; it's a live WebSocket connection handling multi-room events.
 4.  **Professional UI/UX**: Implements a "pixel-perfect" WhatsApp-style interface with responsive mobile adaptations.
+
+### 🔐 Authentication (For Judges)
+The application uses a full JWT-based auth system. You can:
+1.  **Register**: Create a new account with any email/password.
+2.  **Login**: Use your newly created credentials.
+    *   *Tip: No email verification is enforced for this demo.*
 
 **Key Files to Review:**
 - **Frontend Architecture**: `client/src/app/(dashboard)/layout.tsx` (Dashboard Wrap), `client/src/store/useChatStore.ts` (WebSocket Logic).
