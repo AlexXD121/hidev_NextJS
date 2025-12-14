@@ -92,7 +92,7 @@ export function Sidebar({ className, isMobile = false, onClose }: SidebarProps) 
       animate={{ width: isMobile ? "100%" : (isCollapsed ? 80 : 256) }}
       transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
       className={cn(
-        "relative h-screen flex-col shrink-0 border-r bg-secondary/50 backdrop-blur-xl text-foreground z-40",
+        "relative h-[100dvh] flex-col shrink-0 border-r bg-secondary/50 backdrop-blur-xl text-foreground z-40",
         // Only hide on mobile if NOT explicitly in mobile mode (i.e. default desktop sidebar)
         // Mobile: Hidden by default. Desktop: Flex (Sticky sidebar)
         "hidden lg:flex",

@@ -2,7 +2,7 @@
 
 import { Search, MoreVertical, MessageSquarePlus, CircleDashed, Filter } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useChatStore } from "@/store/useChatStore"
 import { useAuthStore } from "@/store/useAuthStore"
@@ -82,7 +82,7 @@ export function ChatSidebar() {
             </div>
 
             {/* Chat List */}
-            <ScrollArea className="flex-1 bg-background">
+            <div className="flex-1 bg-background overflow-y-auto">
                 <div className="flex flex-col">
                     {filteredChats.map((chat, index) => (
                         <button
@@ -136,7 +136,7 @@ export function ChatSidebar() {
                         <span className="flex items-center gap-1"><CircleDashed className="h-3 w-3" /> Your personal messages are end-to-end encrypted</span>
                     </div>
                 </div>
-            </ScrollArea>
+            </div>
         </div>
     )
 }
