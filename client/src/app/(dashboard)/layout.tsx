@@ -32,7 +32,7 @@ export default function DashboardLayout({
                     {/* Header: visible only on mobile/tablet to not double-stack with sidebar on desktop */}
                     <header className={cn("lg:hidden flex items-center p-4 border-b", isChatPage && "hidden")}>
                         <MobileNav />
-                        <span className="font-bold ml-4">WhatsApp Biz</span>
+                        <span className="font-bold ml-4">WhatsApp Business Dashboard</span>
                     </header>
 
                     <main className={cn(

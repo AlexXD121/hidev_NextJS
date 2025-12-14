@@ -6,15 +6,12 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LayoutDashboard, MessageSquare, BarChart3, Users, Zap, CheckCircle2, ArrowRight, Loader2 } from "lucide-react"
+import { BarChart3, Users, Zap, CheckCircle2, Loader2, MessageSquare } from "lucide-react"
 import { toast } from "sonner"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { cn } from "@/lib/utils"
-// Turbo: Add framer-motion for animations
 import { motion, AnimatePresence } from "framer-motion"
 
 const loginSchema = z.object({
@@ -280,6 +277,7 @@ export default function LoginPage() {
                                 )}
                             </AnimatePresence>
                         </div>
+
                     </Tabs>
 
                     <p className="px-8 text-center text-sm text-muted-foreground">

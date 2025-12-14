@@ -119,7 +119,14 @@ export function Sidebar({ className, isMobile = false, onClose }: SidebarProps) 
               exit={{ opacity: 0, width: 0 }}
               className="flex flex-col overflow-hidden whitespace-nowrap"
             >
-              <span className="text-lg font-bold tracking-tight text-foreground">WhatsApp Biz</span>
+              <span className="text-lg font-bold tracking-tight text-foreground">      <div className="flex px-6 py-6 items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500">
+                  <MessageSquare className="h-5 w-5 text-white" />
+                </div>
+                <span className="font-bold text-lg text-emerald-950 dark:text-emerald-50">
+                  WhatsApp Business
+                </span>
+              </div></span>
               <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Dashboard</span>
             </motion.div>
           )}
