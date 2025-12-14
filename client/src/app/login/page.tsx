@@ -54,7 +54,7 @@ export default function LoginPage() {
     const onLogin = async (data: z.infer<typeof loginSchema>) => {
         setIsLoading(true)
         try {
-            await login(data.email, data.password)
+            await login(data.email.trim(), data.password.trim())
 
             toast.success("Welcome back!", {
                 description: "Redirecting to your dashboard...",
@@ -164,114 +164,124 @@ export default function LoginPage() {
                             <TabsTrigger value="register">Create Account</TabsTrigger>
                         </TabsList>
 
-                        <AnimatePresence mode="wait">
-                            <TabsContent value="signin" key="signin">
-                                <motion.form
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    transition={{ duration: 0.3 }}
-                                    onSubmit={handleSubmitLogin(onLogin)}
-                                    className="space-y-4"
-                                >
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email">Email</Label>
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            placeholder="name@company.com"
-                                            className="focus-visible:ring-emerald-500 transition-all duration-300 hover:border-emerald-400"
-                                            {...registerLogin("email")}
-                                        />
-                                        {errorsLogin.email && (
-                                            <p className="text-sm text-red-500">{errorsLogin.email.message}</p>
-                                        )}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between">
-                                            <Label htmlFor="password">Password</Label>
-                                            <a href="#" className="text-sm text-emerald-600 hover:text-emerald-500 font-medium hover:underline">
-                                                Forgot password?
-                                            </a>
-                                        </div>
-                                        <Input
-                                            id="password"
-                                            type="password"
-                                            className="focus-visible:ring-emerald-500 transition-all duration-300 hover:border-emerald-400"
-                                            {...registerLogin("password")}
-                                        />
-                                        {errorsLogin.password && (
-                                            <p className="text-sm text-red-500">{errorsLogin.password.message}</p>
-                                        )}
-                                    </div>
-                                    <Button
-                                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-                                        type="submit"
-                                        disabled={isLoading}
+                        <div className="relative overflow-hidden min-h-[350px]">
+                            <AnimatePresence mode="wait" initial={false}>
+                                {activeTab === "signin" && (
+                                    <motion.div
+                                        key="signin"
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -20 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="absolute inset-0"
                                     >
-                                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Sign In with Email
-                                    </Button>
-                                </motion.form>
-                            </TabsContent>
+                                        <TabsContent value="signin" className="mt-0 space-y-4" forceMount>
+                                            <form onSubmit={handleSubmitLogin(onLogin)} className="space-y-4">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="email">Email</Label>
+                                                    <Input
+                                                        id="email"
+                                                        type="email"
+                                                        placeholder="name@company.com"
+                                                        className="focus-visible:ring-emerald-500 transition-all duration-300 hover:border-emerald-400"
+                                                        {...registerLogin("email")}
+                                                    />
+                                                    {errorsLogin.email && (
+                                                        <p className="text-sm text-red-500">{errorsLogin.email.message}</p>
+                                                    )}
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center justify-between">
+                                                        <Label htmlFor="password">Password</Label>
+                                                        <a href="#" className="text-sm text-emerald-600 hover:text-emerald-500 font-medium hover:underline">
+                                                            Forgot password?
+                                                        </a>
+                                                    </div>
+                                                    <Input
+                                                        id="password"
+                                                        type="password"
+                                                        className="focus-visible:ring-emerald-500 transition-all duration-300 hover:border-emerald-400"
+                                                        {...registerLogin("password")}
+                                                    />
+                                                    {errorsLogin.password && (
+                                                        <p className="text-sm text-red-500">{errorsLogin.password.message}</p>
+                                                    )}
+                                                </div>
+                                                <Button
+                                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                                                    type="submit"
+                                                    disabled={isLoading}
+                                                >
+                                                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                    Sign In with Email
+                                                </Button>
+                                            </form>
+                                        </TabsContent>
+                                    </motion.div>
+                                )}
 
-                            <TabsContent value="register" key="register">
-                                <motion.form
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    transition={{ duration: 0.3 }}
-                                    onSubmit={handleSubmitRegister(onRegister)}
-                                    className="space-y-4"
-                                >
-                                    <div className="space-y-2">
-                                        <Label htmlFor="fullName">Full Name</Label>
-                                        <Input
-                                            id="fullName"
-                                            placeholder="John Doe"
-                                            className="focus-visible:ring-emerald-500 transition-all duration-300 hover:border-emerald-400"
-                                            {...registerRegister("fullName")}
-                                        />
-                                        {errorsRegister.fullName && (
-                                            <p className="text-sm text-red-500">{errorsRegister.fullName.message}</p>
-                                        )}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="register-email">Email</Label>
-                                        <Input
-                                            id="register-email"
-                                            type="email"
-                                            placeholder="name@company.com"
-                                            className="focus-visible:ring-emerald-500 transition-all duration-300 hover:border-emerald-400"
-                                            {...registerRegister("email")}
-                                        />
-                                        {errorsRegister.email && (
-                                            <p className="text-sm text-red-500">{errorsRegister.email.message}</p>
-                                        )}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="register-password">Password</Label>
-                                        <Input
-                                            id="register-password"
-                                            type="password"
-                                            className="focus-visible:ring-emerald-500 transition-all duration-300 hover:border-emerald-400"
-                                            {...registerRegister("password")}
-                                        />
-                                        {errorsRegister.password && (
-                                            <p className="text-sm text-red-500">{errorsRegister.password.message}</p>
-                                        )}
-                                    </div>
-                                    <Button
-                                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-                                        type="submit"
-                                        disabled={isLoading}
+                                {activeTab === "register" && (
+                                    <motion.div
+                                        key="register"
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -20 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="absolute inset-0"
                                     >
-                                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Create Account
-                                    </Button>
-                                </motion.form>
-                            </TabsContent>
-                        </AnimatePresence>
+                                        <TabsContent value="register" className="mt-0 space-y-4" forceMount>
+                                            <form onSubmit={handleSubmitRegister(onRegister)} className="space-y-4">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="fullName">Full Name</Label>
+                                                    <Input
+                                                        id="fullName"
+                                                        placeholder="John Doe"
+                                                        className="focus-visible:ring-emerald-500 transition-all duration-300 hover:border-emerald-400"
+                                                        {...registerRegister("fullName")}
+                                                    />
+                                                    {errorsRegister.fullName && (
+                                                        <p className="text-sm text-red-500">{errorsRegister.fullName.message}</p>
+                                                    )}
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="register-email">Email</Label>
+                                                    <Input
+                                                        id="register-email"
+                                                        type="email"
+                                                        placeholder="name@company.com"
+                                                        className="focus-visible:ring-emerald-500 transition-all duration-300 hover:border-emerald-400"
+                                                        {...registerRegister("email")}
+                                                    />
+                                                    {errorsRegister.email && (
+                                                        <p className="text-sm text-red-500">{errorsRegister.email.message}</p>
+                                                    )}
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="register-password">Password</Label>
+                                                    <Input
+                                                        id="register-password"
+                                                        type="password"
+                                                        className="focus-visible:ring-emerald-500 transition-all duration-300 hover:border-emerald-400"
+                                                        {...registerRegister("password")}
+                                                    />
+                                                    {errorsRegister.password && (
+                                                        <p className="text-sm text-red-500">{errorsRegister.password.message}</p>
+                                                    )}
+                                                </div>
+                                                <Button
+                                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                                                    type="submit"
+                                                    disabled={isLoading}
+                                                >
+                                                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                    Create Account
+                                                </Button>
+                                            </form>
+                                        </TabsContent>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </Tabs>
 
                     <p className="px-8 text-center text-sm text-muted-foreground">

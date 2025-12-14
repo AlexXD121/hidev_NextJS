@@ -207,7 +207,7 @@ export const useChatStore = create<ChatState>()(
                 const wsUrl = process.env.NEXT_PUBLIC_WS_URL || `${protocol}//${host}:${port}/api/ws/dashboard_client`;
 
                 // Quietly connect
-                // console.log("🔌 Connecting to WebSocket:", wsUrl);
+                console.log("🔌 Connecting to WebSocket:", wsUrl);
                 const ws = new WebSocket(wsUrl);
 
                 ws.onopen = () => {
@@ -236,7 +236,7 @@ export const useChatStore = create<ChatState>()(
 
                 ws.onerror = (error: any) => {
                     // Suppress "Connection Refused" noise during dev/reload
-                    console.warn("WebSocket Connection Error (Auto-reconnecting...)");
+                    console.log("WebSocket Connection Error (Auto-reconnecting...)");
                     ws.close(); // Ensure close triggers reconnect
                 };
 

@@ -140,9 +140,12 @@ async def send_message_alias(payload: SendMessageRequest, background_tasks: Back
 # --- WebSocket Endpoint ---
 
 @router.websocket("/ws/{client_id}")
+@router.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
-    await manager.connect(websocket)
+    print(f"🔄 WS Handshake Start: {client_id}")
     try:
+        await manager.connect(websocket)
+        print(f"✅ WS Connected: {client_id}")
         while True:
             # We can listed for incoming messages if we want bidirectional sending via WS too
             data = await websocket.receive_text()
@@ -150,4 +153,12 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
             # Maybe handle "typing" events here later.
             print(f"WS Received from {client_id}: {data}")
     except WebSocketDisconnect:
+        print(f"❌ WS Disconnect: {client_id}")
         manager.disconnect(websocket)
+    except Exception as e:
+        print(f"❌ WS Error: {e}")
+        # Ensure we close if something else broke
+        try:
+             await websocket.close()
+        except:
+             pass

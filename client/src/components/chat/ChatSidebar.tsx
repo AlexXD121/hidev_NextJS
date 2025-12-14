@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useChatStore } from "@/store/useChatStore"
+import { useAuthStore } from "@/store/useAuthStore"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 import { Button } from "@/components/ui/button"
@@ -15,6 +16,7 @@ import { MobileNav } from "@/components/layout/mobile-nav"
 
 export function ChatSidebar() {
     const { chats, selectedChatId, selectChat, fetchChats, pollMessages } = useChatStore()
+    const { user } = useAuthStore()
     const [searchQuery, setSearchQuery] = useState("")
 
     // Initial fetch setup
@@ -28,16 +30,16 @@ export function ChatSidebar() {
     )
 
     return (
-        <div className="flex flex-col h-full border-r border-[#e9edef] dark:border-[#2f3b43] bg-background w-full md:w-[400px]">
+        <div className="flex flex-col h-full border-r border-[#e9edef] dark:border-[#2f3b43] bg-background w-full min-h-0">
             {/* Header */}
-            <div className="h-16 px-4 py-2 bg-secondary flex items-center justify-between shrink-0">
+            <div className="h-16 px-4 py-2 bg-secondary flex items-center justify-between shrink-0 z-20 relative shadow-sm">
                 <div className="flex items-center gap-3">
                     <div className="lg:hidden">
                         <MobileNav />
                     </div>
                     <Avatar className="cursor-pointer">
-                        <AvatarImage src="/icon-192x192.png" />
-                        <AvatarFallback>ME</AvatarFallback>
+                        <AvatarImage src={user?.avatar || "/icon-192x192.png"} />
+                        <AvatarFallback>{user?.name?.charAt(0) || "ME"}</AvatarFallback>
                     </Avatar>
                 </div>
 
@@ -59,20 +61,23 @@ export function ChatSidebar() {
             </div>
 
             {/* Search Bar */}
-            <div className="p-2 border-b border-[#e9edef] dark:border-[#2f3b43] bg-background">
-                <div className="flex items-center gap-2">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#54656F] dark:text-[#aebac1]" />
-                        <Input
-                            placeholder="Search or start new chat"
-                            className="pl-10 h-9 bg-secondary border-none rounded-lg text-sm placeholder:text-[#54656F] dark:placeholder:text-[#aebac1] focus-visible:ring-0"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
+            <div className="p-2 border-b border-[#e9edef] dark:border-[#2f3b43] bg-background shrink-0 z-10 relative">
+                {/* Search Bar */}
+                <div className="p-2 border-b border-[#e9edef] dark:border-[#2f3b43] bg-background shrink-0 z-10 relative">
+                    <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9 text-[#54656F] dark:text-[#aebac1]">
+                            <Filter className="h-5 w-5" />
+                        </Button>
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#54656F] dark:text-[#aebac1]" />
+                            <Input
+                                placeholder="Search or start new chat"
+                                className="pl-10 h-9 bg-[#f0f2f5] dark:bg-[#202c33] border-none rounded-lg text-sm placeholder:text-[#54656F] dark:placeholder:text-[#aebac1] focus-visible:ring-0"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="shrink-0 text-[#54656F] dark:text-[#aebac1]">
-                        <Filter className="h-5 w-5" />
-                    </Button>
                 </div>
             </div>
 

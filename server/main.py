@@ -26,7 +26,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # Include Routers
 app.include_router(auth.router, prefix="/api")
 app.include_router(contacts.router, prefix="/api")

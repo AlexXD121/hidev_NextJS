@@ -8,6 +8,8 @@ import React from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
+import { useChatStore } from "@/store/useChatStore";
+
 export default function DashboardLayout({
     children,
 }: {
@@ -15,6 +17,12 @@ export default function DashboardLayout({
 }) {
     const pathname = usePathname();
     const isChatPage = pathname === "/chat" || pathname?.startsWith("/chat/");
+    const { connectSocket, disconnectSocket } = useChatStore();
+
+    React.useEffect(() => {
+        connectSocket();
+        return () => disconnectSocket();
+    }, [connectSocket, disconnectSocket]);
 
     return (
         <AuthGuard>
@@ -22,7 +30,7 @@ export default function DashboardLayout({
                 <Sidebar />
                 <div className="flex-1 flex flex-col overflow-hidden">
                     {/* Header: visible only on mobile/tablet to not double-stack with sidebar on desktop */}
-                    <header className={cn("md:hidden flex items-center p-4 border-b", isChatPage && "hidden")}>
+                    <header className={cn("lg:hidden flex items-center p-4 border-b", isChatPage && "hidden")}>
                         <MobileNav />
                         <span className="font-bold ml-4">WhatsApp Biz</span>
                     </header>

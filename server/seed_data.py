@@ -4,7 +4,7 @@ from database import init_db
 from models import Campaign, Template, CampaignStatus, TemplateCategory
 from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
-from models import Campaign, Template, CampaignStatus, TemplateCategory, Contact, Message
+from models import Campaign, Template, CampaignStatus, TemplateCategory, Contact, Message, User
 import random
 from datetime import datetime, timedelta
 
@@ -27,7 +27,7 @@ async def seed():
         print("✅ Connected to MongoDB")
         
         # Initialize Beanie with explicit database
-        await init_beanie(database=client.whatsapp_dashboard, document_models=[Campaign, Template, Contact, Message])
+        await init_beanie(database=client.whatsapp_dashboard, document_models=[Campaign, Template, Contact, Message, User])
     except Exception as e:
         print(f"❌ Connection failed: {e}")
         return
@@ -213,6 +213,27 @@ async def seed():
     for c in campaigns:
         await c.insert()
     print(f"✅ Added {len(campaigns)} campaigns.")
+
+    # Seed User (Admin)
+    print("Creating User...")
+    # Hash password "12345678"
+    import bcrypt
+    pwd_bytes = "12345678".encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(pwd_bytes, salt).decode('utf-8')
+    
+    admin_user = User(
+        name="Demo Admin",
+        email="dmr19104@gmail.com",
+        password_hash=hashed_password,
+        role="admin",
+        avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin"
+    )
+    
+    # Check if exists (though we clear DB above, so just insert)
+    await User.delete_all() 
+    await admin_user.insert()
+    print(f"✅ Added Admin User: dmr19104@gmail.com / 12345678")
 
     print("🌱 Seeding complete!")
 

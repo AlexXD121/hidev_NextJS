@@ -31,30 +31,34 @@ def create_access_token(data: dict):
 
 @router.post("/login", response_model=AuthResponse)
 async def login(request: LoginRequest):
-    print(f"👉 Login: {request.email}")
+    email = request.email.strip()
+    password = request.password.strip()
     
-    user = await User.find_one(User.email == request.email)
+    user = await User.find_one(User.email == email)
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        raise HTTPException(status_code=401, detail="Invalid credentials (User not found)")
     
     # Legacy fallbacks (optional)
     if user.password_hash == "hashed_secret":
-        if request.password in ["password", "password123"]:
+        if password in ["password", "password123"]:
             # Migrate to bcrypt if we wanted, for now just allow
             pass
         else:
              raise HTTPException(status_code=401, detail="Invalid credentials")
     else:
-        if not verify_password(request.password, user.password_hash):
-            raise HTTPException(status_code=401, detail="Invalid credentials")
-
+        is_valid = verify_password(password, user.password_hash)
+        if not is_valid:
+            # Do not print passwords in prod, but helpful for user debugging now
+            # print(f"   Input: '{password}'") 
+            # print(f"   Stored Hash: {user.password_hash}")
+            raise HTTPException(status_code=401, detail="Invalid credentials (Password mismatch)")
+    
     token = create_access_token({"sub": str(user.id), "email": user.email, "role": user.role})
     
     return AuthResponse(user=user, token=token)
 
 @router.post("/register", response_model=AuthResponse)
 async def register(request: RegisterRequest):
-    print(f"👉 Register: {request.email}")
     
     existing_user = await User.find_one(User.email == request.email)
     if existing_user:
