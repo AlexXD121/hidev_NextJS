@@ -17,7 +17,7 @@ export function MobileNav() {
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 border-r border-slate-800 bg-slate-950 w-64 text-white">
-                <Sidebar />
+                <Sidebar className="flex h-full w-full" />
             </SheetContent>
         </Sheet>
     );

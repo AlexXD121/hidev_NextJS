@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import { NewChatDialog } from "@/components/chat/NewChatDialog"
 
+import { MobileNav } from "@/components/layout/mobile-nav"
+
 export function ChatSidebar() {
     const { chats, selectedChatId, selectChat, fetchChats, pollMessages } = useChatStore()
     const [searchQuery, setSearchQuery] = useState("")
@@ -35,10 +37,15 @@ export function ChatSidebar() {
         <div className="flex flex-col h-full border-r border-[#e9edef] dark:border-[#2f3b43] bg-background w-full md:w-[400px]">
             {/* Header */}
             <div className="h-16 px-4 py-2 bg-secondary flex items-center justify-between shrink-0">
-                <Avatar className="cursor-pointer">
-                    <AvatarImage src="/placeholder-user.jpg" />
-                    <AvatarFallback>ME</AvatarFallback>
-                </Avatar>
+                <div className="flex items-center gap-3">
+                    <div className="lg:hidden">
+                        <MobileNav />
+                    </div>
+                    <Avatar className="cursor-pointer">
+                        <AvatarImage src="/icon-192x192.png" />
+                        <AvatarFallback>ME</AvatarFallback>
+                    </Avatar>
+                </div>
 
                 <div className="flex items-center gap-2 text-[#54656F] dark:text-[#aebac1]">
                     <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">

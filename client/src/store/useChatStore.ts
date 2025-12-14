@@ -12,7 +12,7 @@ interface ChatState {
     typingIndicators: Record<string, boolean>;
 
     // Actions
-    selectChat: (chatId: string) => void;
+    selectChat: (chatId: string | null) => void;
     fetchChats: () => Promise<void>;
     fetchMessages: (chatId: string) => Promise<void>;
     sendMessage: (chatId: string, text: string, type?: 'text' | 'image' | 'document' | 'template', mediaUrl?: string) => Promise<void>;
@@ -41,13 +41,15 @@ export const useChatStore = create<ChatState>()(
 
             selectChat: (chatId) => {
                 set({ selectedChatId: chatId });
-                get().fetchMessages(chatId);
-                // Mark as read locally
-                set(state => ({
-                    chats: state.chats.map(c =>
-                        c.id === chatId ? { ...c, unreadCount: 0 } : c
-                    )
-                }));
+                if (chatId) {
+                    get().fetchMessages(chatId);
+                    // Mark as read locally
+                    set(state => ({
+                        chats: state.chats.map(c =>
+                            c.id === chatId ? { ...c, unreadCount: 0 } : c
+                        )
+                    }));
+                }
             },
 
             fetchChats: async () => {
@@ -213,10 +215,19 @@ export const useChatStore = create<ChatState>()(
                 ws.onclose = () => {
                     console.log("❌ WebSocket Disconnected");
                     set({ socket: null });
+
+                    // Auto-reconnect after 3 seconds if not intentionally disconnected
+                    // We can check a flag or just always try to reconnect if we are in a "should be connected" state.
+                    // For now, simple retry:
+                    setTimeout(() => {
+                        console.log("🔄 Attempting Reconnect...");
+                        get().connectSocket();
+                    }, 3000);
                 };
 
-                ws.onerror = (error) => {
+                ws.onerror = (error: Event) => {
                     console.error("WebSocket Error:", error);
+                    ws.close(); // Ensure close triggers reconnect
                 };
 
                 set({ socket: ws });
@@ -225,6 +236,8 @@ export const useChatStore = create<ChatState>()(
             disconnectSocket: () => {
                 const { socket } = get();
                 if (socket) {
+                    // Remove listener to prevent auto-reconnect loop on intentional logout/unmount
+                    socket.onclose = null;
                     socket.close();
                     set({ socket: null });
                 }

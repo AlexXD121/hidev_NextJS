@@ -117,6 +117,11 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
             accessorKey: "phone",
             header: "Phone",
             cell: ({ row }: CellContext<Contact, unknown>) => <div>{row.getValue("phone")}</div>,
+            enableHiding: true, // Allow hiding
+            // Hide on small screens
+            meta: {
+                className: "hidden md:table-cell"
+            }
         },
         {
             accessorKey: "tags",
@@ -133,6 +138,9 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
                     </div>
                 )
             },
+            meta: {
+                className: "hidden lg:table-cell" // Hide tags on mobile/tablet
+            }
         },
         {
             accessorKey: "lastActive",
@@ -141,6 +149,7 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
                     <Button
                         variant="ghost"
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="hidden md:flex" // Hide header button
                     >
                         Last Active
                         <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -149,8 +158,11 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
             },
             cell: ({ row }: CellContext<Contact, unknown>) => {
                 const date = new Date(row.getValue("lastActive"))
-                return <div className="text-muted-foreground text-sm">{date.toLocaleDateString()}</div>
+                return <div className="text-muted-foreground text-sm hidden md:block">{date.toLocaleDateString()}</div>
             },
+            meta: {
+                className: "hidden md:table-cell"
+            }
         },
         {
             id: "actions",
@@ -286,14 +298,18 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
                 open={!!selectedContact}
                 onOpenChange={(open) => !open && setSelectedContact(null)}
             />
-            <div className="rounded-md border bg-card">
+            <div className="rounded-md border bg-card overflow-x-auto">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
+                                    // Access custom meta className (safe cast if needed)
+                                    // @ts-ignore
+                                    const className = header.column.columnDef.meta?.className
+
                                     return (
-                                        <TableHead key={header.id}>
+                                        <TableHead key={header.id} className={className}>
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
@@ -323,14 +339,18 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
                                 >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </TableCell>
-                                    ))}
+                                    {row.getVisibleCells().map((cell) => {
+                                        // @ts-ignore
+                                        const className = cell.column.columnDef.meta?.className
+                                        return (
+                                            <TableCell key={cell.id} className={className}>
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </TableCell>
+                                        )
+                                    })}
                                 </TableRow>
                             ))
                         ) : (

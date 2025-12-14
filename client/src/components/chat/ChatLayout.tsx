@@ -6,7 +6,7 @@ import { ChatArea } from "./ChatArea"
 import { useChatStore } from "@/store/useChatStore"
 
 export function ChatLayout() {
-    const { connectSocket, disconnectSocket } = useChatStore()
+    const { connectSocket, disconnectSocket, selectedChatId } = useChatStore()
 
     useEffect(() => {
         // Initialize WebSocket connection
@@ -20,8 +20,12 @@ export function ChatLayout() {
 
     return (
         <div className="flex h-full w-full bg-background overflow-hidden relative">
-            <ChatSidebar />
-            <ChatArea />
+            <div className={`h-full w-full lg:w-80 border-r bg-background ${selectedChatId ? "hidden lg:flex" : "flex"}`}>
+                <ChatSidebar />
+            </div>
+            <div className={`flex-1 h-full ${!selectedChatId ? "hidden lg:flex" : "flex"}`}>
+                <ChatArea />
+            </div>
         </div>
     )
 }

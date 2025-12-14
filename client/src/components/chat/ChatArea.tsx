@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { MoreVertical, Paperclip, Search, Smile, Mic, Plus, MessageSquare } from "lucide-react"
+import { MoreVertical, Paperclip, Search, Smile, Mic, Plus, MessageSquare, ChevronLeft } from "lucide-react"
 import { useChatStore } from "@/store/useChatStore"
 import { useCallStore } from "@/store/useCallStore"
 import { MessageBubble } from "./MessageBubble"
@@ -95,6 +95,14 @@ export function ChatArea() {
             {/* Header */}
             <div className="h-16 px-4 py-2 border-b border-[#e9edef] dark:border-[#2f3b43] bg-secondary flex items-center justify-between shrink-0 z-10">
                 <div className="flex items-center gap-3 cursor-pointer">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="lg:hidden mr-[-8px] text-muted-foreground"
+                        onClick={() => useChatStore.getState().selectChat(null)}
+                    >
+                        <ChevronLeft className="h-6 w-6" />
+                    </Button>
                     <Avatar>
                         <AvatarImage src={selectedChat.contact.avatar} />
                         <AvatarFallback>{selectedChat.contact.name.substring(0, 2)}</AvatarFallback>
